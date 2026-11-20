@@ -631,7 +631,8 @@ const INTRO = [
 // ===== 保存 (ブラウザ内のみ) =====
 const STORE_KEY = 'yubinavi-v3';
 let save = {layout:null, hint:'full', strict:true, lesson:'intro', miss:{}, hits:{}, best:{}, auto:true, level:0, lvPass:0};
-try { Object.assign(save, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch(e) {}
+let hadSave = false;   // 前に練習した記録があるか (続きから始めるときの案内用)
+try { const s = localStorage.getItem(STORE_KEY); if (s){ Object.assign(save, JSON.parse(s)); hadSave = true; } } catch(e) {}
 function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e) {} }
 
 // ===== 状態 =====
@@ -1252,6 +1253,12 @@ if (!save.layout && navigator.keyboard && navigator.keyboard.getLayoutMap){
 syncLevel(false);
 buildMaps(); renderKeyboard(); renderHands(); renderLessonSel(); applyHint(); renderLevelTag();
 fitLayout(); newRound(); fitLayout();
+if (hadSave && LESSONS[lessonIdx].type !== 'intro'){
+  const where = onLevel()
+    ? `<b>${levelName(save.level)}</b>(レベルアップまで ${save.lvPass}/${LV_NEED})`
+    : `<b>${LESSONS[lessonIdx].title}</b>`;
+  setMsg(`おかえりなさい。前回の続き ${where} から始めます。そのまま打ち始めてください。`, true);
+}
 </script>
 </body>
 </html>
