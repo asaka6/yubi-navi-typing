@@ -99,14 +99,32 @@ button:hover{border-color:var(--accent)}
 [data-f$="m"]{--fc:var(--f-m);--fs:var(--fs-m)} [data-f$="i"]{--fc:var(--f-i);--fs:var(--fs-i)}
 [data-f="th"]{--fc:var(--f-t);--fs:var(--fs-t)}
 .handov{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
-.handov .palm{fill:var(--skin);opacity:.18}
-.handov line{stroke-linecap:round}
-.handov .body{stroke:var(--skin);opacity:.28}
-.handov .ol{stroke:var(--accent);opacity:0}
-.handov .fg.on .body{stroke:var(--fs);opacity:.5}
-.handov .fg.on .ol{opacity:.85}
-.handov .fg.on2 .body{stroke:var(--fs);opacity:.35}
-.handov .fg.on2 .ol{opacity:.45}
+.handov .palm{fill:var(--skin);fill-opacity:.18;stroke:var(--skin);stroke-opacity:.5;stroke-width:3;stroke-linejoin:round}
+.handov .body{fill:var(--skin);fill-opacity:.24;stroke:var(--skin);stroke-opacity:.6;stroke-width:3;stroke-linejoin:round}
+.handov .nail{fill:#fff;fill-opacity:.35;stroke:var(--skin);stroke-opacity:.65;stroke-width:2}
+.handov .crease{stroke:var(--skin);stroke-opacity:.7;stroke-width:3;stroke-linecap:round}
+.handov .fg.on .body{fill:var(--fs);fill-opacity:.45;stroke:var(--accent);stroke-opacity:.9;stroke-width:6}
+.handov .fg.on2 .body{fill:var(--fs);fill-opacity:.3;stroke:var(--accent);stroke-opacity:.6;stroke-width:5;stroke-dasharray:14 8}
+
+/* 横から見た指 */
+.cardrow{display:flex;gap:12px}
+.cardmain{flex:1;min-width:0}
+.sidepanel{flex:none;width:260px;border-left:1px solid var(--line);padding-left:12px;display:flex;flex-direction:column;justify-content:center}
+.sidepanel .st{font-size:12px;color:var(--muted)}
+.sidepanel svg{width:100%;height:auto;display:block}
+.sidepanel .cap{font-size:13px;line-height:1.4;min-height:2.8em}
+.side .kc{fill:var(--key);stroke:var(--line);stroke-width:1.5}
+.side .kc.on{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2.5}
+.side .kbbase{fill:var(--line)}
+.side .rl{font-size:12px;fill:var(--muted);text-anchor:middle}
+.side line,.side .ao,.side .am{stroke-linecap:round;stroke-linejoin:round;fill:none}
+.side .ao{stroke:#a87a55}
+.side .am{stroke:#ecc9a8}
+.side .fo{stroke:#a87a55}
+.side .fo.on{stroke:var(--accent)}
+.side .fm{stroke:#ecc9a8}
+.side .nl{stroke:#fff3ea;stroke-width:4}
+@media (max-width: 760px){ .sidepanel{display:none} }
 .hidden{visibility:hidden}
 
 /* result */
@@ -140,7 +158,8 @@ button:hover{border-color:var(--accent)}
         <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
       </div>
     </header>
-    <div class="card" id="card">
+    <div class="card cardrow" id="card">
+     <div class="cardmain">
       <div class="guide" id="guide"></div>
       <div class="textbox" id="textbox">
         <div class="text" id="text"></div>
@@ -154,6 +173,12 @@ button:hover{border-color:var(--accent)}
         <div class="bar"><i id="lvBar"></i></div>
         <button id="restartBtn">やり直す (Esc)</button>
       </div>
+     </div>
+     <div class="sidepanel" id="sidepanel">
+       <div class="st" id="sideTitle">横から見た指</div>
+       <svg class="side" id="side" viewBox="22 22 290 132" aria-hidden="true"></svg>
+       <div class="cap" id="sideCap"></div>
+     </div>
     </div>
   </div>
   <div class="kbbox" id="kbbox">
@@ -306,7 +331,8 @@ const INTRO = [
   {title:'① ホームポジション', html:
     'キーボードの <b>F</b> と <b>J</b> には小さな<b>突起</b>があります(下の図の線)。ここに左右の<b>人差し指</b>をのせ、残りの指を横に並べます。<br>' +
     '左手 <b>A S D F</b> ／ 右手 <b>J K L ;</b> ／ 親指は<b>スペース</b>の上。<br>' +
-    '指は軽く丸め、手首は少し浮かせます。打っていないときは、いつもこの位置に指を置きます。',
+    '指は<b>卵を軽く握るように丸め</b>、指先(爪のすぐ下)でキーを真上から押します。手首は少し浮かせます。<br>' +
+    '上の段は指を伸ばし、下の段は指を曲げて手前に引きます(右の「横から見た指」)。',
     hl:() => ({codes:['KeyA','KeyS','KeyD','KeyF','KeyJ','KeyK','KeyL','Semicolon','Space'], fingers:Object.keys(FINGERS)})},
   {title:'② 指の担当', html:
     '<b>キーの色と、指の色が同じ</b>です。各指はホームから<b>真上・真下</b>(少し左に斜め)へ動きます。<br>' +
@@ -384,26 +410,54 @@ function renderHands(){
   const sp = centers.Space;
   let s = ''; FG = {};
   for (const side of ['l','r']){
+    const sg = side === 'l' ? 1 : -1;               // 内側(親指側)の向き
     const fs = ['p','r','m','i'].map(x => side + x);
     const tips = fs.map(f => centers[HOME[f]]);
     const cx = tips.reduce((a, t) => a + t.x, 0) / 4;
-    const kn = tips.map(t => ({x: cx + (t.x - cx) * 0.8, y: 440}));
-    const minX = Math.min(...kn.map(k => k.x)) - 50, maxX = Math.max(...kn.map(k => k.x)) + 50;
-    s += `<rect class="palm" x="${minX}" y="400" width="${maxX - minX}" height="235" rx="95"/>`;
-    const inner = side === 'l' ? maxX : minX;
-    FG['th' + side] = {f:'th', kx: inner + (side === 'l' ? -45 : 45), ky:575, hx: sp.x + (side === 'l' ? -120 : 120), hy:470, w:64};
-    fs.forEach((f, i) => FG[f] = {f, kx:kn[i].x, ky:kn[i].y, hx:tips[i].x, hy:tips[i].y + TIP_DY, w: f.endsWith('p') ? 50 : 58});
+    const kn = tips.map((t, i) => ({x: cx + (t.x - cx) * 0.82, y: 445 + (i === 0 ? 18 : i === 3 ? 6 : 0)}));
+    const xo = kn[0].x - sg * 48, xi = kn[3].x + sg * 46;   // 外側・内側の縁
+    // 手の甲: 指の付け根 → 外側の縁 → 手首 → 親指の付け根
+    s += `<path class="palm" d="M${kn[0].x - sg*22},${kn[0].y - 20}
+      Q${xo - sg*4},${kn[0].y + 5} ${xo + sg*4},${kn[0].y + 90}
+      Q${xo + sg*14},${600} ${xo + sg*44},${660}
+      L${xi - sg*58},${660}
+      Q${xi - sg*30},${620} ${xi + sg*6},${560}
+      Q${xi + sg*14},${510} ${xi - sg*4},${kn[3].y - 6}
+      Q${(kn[0].x + kn[3].x) / 2},${kn[1].y - 46} ${kn[0].x - sg*22},${kn[0].y - 20} Z"/>`;
+    FG['th' + side] = {f:'th', kx: xi - sg*20, ky:560, hx: sp.x - sg*118, hy:478, wb:74, wt:58, nCrease:1};
+    fs.forEach((f, i) => FG[f] = {f, kx:kn[i].x, ky:kn[i].y, hx:tips[i].x, hy:tips[i].y + TIP_DY,
+      wb: i === 0 ? 58 : i === 2 ? 70 : 66, wt: i === 0 ? 46 : i === 2 ? 56 : 52, nCrease:2});
   }
   for (const [id, g] of Object.entries(FG)){
-    s += `<g class="fg" data-f="${g.f}" id="fg-${id}"><line class="ol" stroke-width="${g.w + 14}"/><line class="body" stroke-width="${g.w}"/></g>`;
+    s += `<g class="fg" data-f="${g.f}" id="fg-${id}"><path class="body"/><ellipse class="nail"/>` +
+         `<line class="crease"/>${g.nCrease > 1 ? '<line class="crease"/>' : ''}</g>`;
   }
   $('hands').innerHTML = s;
   resetHands();
 }
-function setLine(id, x, y){
-  const g = FG[id];
-  document.querySelectorAll(`#fg-${id} line`).forEach(l => {
-    l.setAttribute('x1', x); l.setAttribute('y1', y); l.setAttribute('x2', g.kx); l.setAttribute('y2', g.ky);
+// 付け根(kx,ky)から指先(tx,ty)までの、先が細く丸い指を描く (爪・関節のしわ付き)
+function setLine(id, tx, ty){
+  const g = FG[id], el = $('fg-' + id);
+  let ux = tx - g.kx, uy = ty - g.ky; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+  const nx = -uy, ny = ux, r = g.wt / 2, R = g.wb / 2, k = 1.33 * r;
+  const bx = g.kx - ux * 45, by = g.ky - uy * 45;     // 付け根は手の甲の中まで
+  const cx = tx - ux * r, cy = ty - uy * r;
+  const f = v => v.toFixed(1);
+  el.querySelector('.body').setAttribute('d',
+    `M${f(bx + nx*R)},${f(by + ny*R)} L${f(cx + nx*r)},${f(cy + ny*r)} ` +
+    `C${f(cx + nx*r + ux*k)},${f(cy + ny*r + uy*k)} ${f(cx - nx*r + ux*k)},${f(cy - ny*r + uy*k)} ${f(cx - nx*r)},${f(cy - ny*r)} ` +
+    `L${f(bx - nx*R)},${f(by - ny*R)} Z`);
+  const ang = Math.atan2(uy, ux) * 180 / Math.PI;
+  const nail = el.querySelector('.nail'), nc = {x: tx - ux * r * 1.05, y: ty - uy * r * 1.05};
+  nail.setAttribute('cx', f(nc.x)); nail.setAttribute('cy', f(nc.y));
+  nail.setAttribute('rx', f(r * .8)); nail.setAttribute('ry', f(r * .58));
+  nail.setAttribute('transform', `rotate(${f(ang)} ${f(nc.x)} ${f(nc.y)})`);
+  const pos = g.nCrease > 1 ? [0.3, 0.6] : [0.42];
+  el.querySelectorAll('.crease').forEach((c, i) => {
+    const s = (L + 45) * pos[i], px = tx - ux * s, py = ty - uy * s;
+    const w = (r + (R - r) * s / (L + 45)) * 0.5;
+    c.setAttribute('x1', f(px + nx*w)); c.setAttribute('y1', f(py + ny*w));
+    c.setAttribute('x2', f(px - nx*w)); c.setAttribute('y2', f(py - ny*w));
   });
 }
 function resetHands(){
@@ -411,6 +465,84 @@ function resetHands(){
     setLine(id, g.hx, g.hy);
     $('fg-' + id).classList.remove('on', 'on2');
   }
+}
+
+// ===== 横から見た指 (どの段で、どれくらい曲げるか) =====
+const SIDE_RX = [52, 96, 140, 184, 238], SIDE_RY = [92, 96, 100, 104, 110];
+const ROW_CAP = [
+  '数字の段: 手ごと少し前に出して、指をしっかり伸ばす',
+  '上の段: 指を前へ伸ばして押す',
+  'ホーム段: 卵を軽く握るように丸め、指先で真上から押す',
+  '下の段: 指を曲げて、手前に引くように押す',
+  'スペース: 親指の側面で軽く押す(他の指はホームのまま)'
+];
+// 3つの関節を持つ指が、目標の点に指先を置く姿勢を探す
+function solveFinger(K, T, segs){
+  const total = segs[0] + segs[1] + segs[2];
+  const K2 = {x:K.x, y:K.y};
+  // 届かないときは手ごと前へ、近すぎるときは手前へずらす
+  const dy = T.y - K2.y, d = Math.hypot(T.x - K2.x, dy);
+  const reach = r => T.x + Math.sqrt(Math.max(0, (total * r) ** 2 - dy * dy));
+  if (d > total * 0.9) K2.x = reach(0.9);
+  else if (d < total * 0.5) K2.x = reach(0.5);
+  let best = null;
+  for (let a = Math.PI * 0.5; a <= Math.PI * 1.12; a += 0.02){
+    for (let b = 0; b <= 1.7; b += 0.025){
+      const d1 = a, d2 = a - b, d3 = a - 1.7 * b;
+      if (d3 < Math.PI * 0.42 || d3 > Math.PI * 0.95) continue;   // 指先は下向き
+      const p1 = {x:K2.x + segs[0] * Math.cos(d1), y:K2.y + segs[0] * Math.sin(d1)};
+      const p2 = {x:p1.x + segs[1] * Math.cos(d2), y:p1.y + segs[1] * Math.sin(d2)};
+      const p3 = {x:p2.x + segs[2] * Math.cos(d3), y:p2.y + segs[2] * Math.sin(d3)};
+      const e = Math.hypot(p3.x - T.x, p3.y - T.y) + b * 2;
+      if (!best || e < best.e) best = {e, pts:[K2, p1, p2, p3]};
+    }
+  }
+  return best.pts;
+}
+function updateSide(f, code){
+  if (!f) return;
+  const row = code && centers[code] ? Math.min(4, Math.round((centers[code].y - 50) / 100)) : 2;
+  const fingerRow = f === 'th' ? 2 : row;
+  let s = `<path class="kbbase" d="M30,${SIDE_RY[0] + 12} L268,${SIDE_RY[4] + 12} L268,${SIDE_RY[4] + 20} L30,${SIDE_RY[0] + 20} Z"/>`;
+  const names = ['数字', '上', 'ホーム', '下', 'スペース'];
+  SIDE_RX.forEach((x, i) => {
+    const w = i === 4 ? 52 : 38;
+    const on = (f === 'th' ? i === 4 : i === row);
+    s += `<rect class="kc${on ? ' on' : ''}" x="${x - w/2}" y="${SIDE_RY[i]}" width="${w}" height="12" rx="3"/>`;
+    s += `<text class="rl" x="${x}" y="${SIDE_RY[4] + 34}">${names[i]}</text>`;
+  });
+  const sc = {p:.8, r:.95, m:1, i:.94, h:1}[f[1]];
+  const K = {x:214, y:48};
+  const pts = solveFinger(K, {x:SIDE_RX[fingerRow] + 4, y:SIDE_RY[fingerRow] - 2}, [48*sc, 32*sc, 24*sc]);
+  const k0 = pts[0];
+  // 指: 輪郭(色) → 肌 → 爪 の順に重ねて、関節が丸くつながる1本の指にする
+  const finger = (p, widths, active, fAttr) => {
+    let o = '', m = '';
+    for (let i = 0; i < 3; i++){
+      const seg = `x1="${p[i].x.toFixed(1)}" y1="${p[i].y.toFixed(1)}" x2="${p[i+1].x.toFixed(1)}" y2="${p[i+1].y.toFixed(1)}"`;
+      o += `<line class="fo${active ? ' on' : ''}" data-f="${fAttr}" stroke-width="${widths[i] + 5}" ${seg}/>`;
+      m += `<line class="fm" stroke-width="${widths[i]}" ${seg}/>`;
+    }
+    // 爪: 最後の関節の背側(上側)、指先の手前
+    const a = p[2], b = p[3], L = Math.hypot(b.x - a.x, b.y - a.y), ux = (b.x - a.x) / L, uy = (b.y - a.y) / L;
+    let nx = -uy, ny = ux; if (ny > 0 || (ny === 0 && nx < 0)) { nx = -nx; ny = -ny; }
+    const w = widths[2] * 0.42;
+    const n1 = {x: b.x - ux * L * 0.55 + nx * w, y: b.y - uy * L * 0.55 + ny * w};
+    const n2 = {x: b.x - ux * 3 + nx * w, y: b.y - uy * 3 + ny * w};
+    return {o, m: m + `<line class="nl" x1="${n1.x.toFixed(1)}" y1="${n1.y.toFixed(1)}" x2="${n2.x.toFixed(1)}" y2="${n2.y.toFixed(1)}"/>`};
+  };
+  // 手の甲と腕 (輪郭を先に全部描いてから中身を塗ると、継ぎ目のない1つの手になる)
+  const hand = `M${k0.x + 4},${k0.y} L${k0.x + 70},${k0.y + 12} L340,${k0.y + 26}`;
+  const parts = [finger(pts, [17, 15, 13], f !== 'th', f)];
+  if (f === 'th'){
+    const tp = solveFinger({x:k0.x + 22, y:k0.y + 18}, {x:SIDE_RX[4] - 6, y:SIDE_RY[4] - 2}, [24, 20, 15]);
+    parts.push(finger(tp, [17, 15, 13], true, 'th'));
+  }
+  s += `<path class="ao" stroke-width="41" d="${hand}"/>` + parts.map(p => p.o).join('') +
+       `<path class="am" stroke-width="36" d="${hand}"/>` + parts.map(p => p.m).join('');
+  $('side').innerHTML = s;
+  $('sideTitle').textContent = '横から見た指 — ' + FINGERS[f];
+  $('sideCap').textContent = ROW_CAP[f === 'th' ? 4 : row];
 }
 // 指を光らせ、押すキーまで指先を伸ばす
 function markFinger(f, cls, code){
@@ -536,6 +668,7 @@ function showIntro(){
   if (p.hl){
     const h = p.hl(); $('kb').classList.add('dim');
     h.codes.forEach(c => markKey(c, 'hl')); h.fingers.forEach(f => markFinger(f, 'on'));
+    updateSide('li', 'KeyF');
   }
   if (p.cycle){
     const order = ['lp','lr','lm','li','th','ri','rm','rr','rp']; let i = 0;
@@ -543,7 +676,7 @@ function showIntro(){
       clearMarks(); $('kb').classList.add('dim');
       const f = order[i++ % order.length];
       document.querySelectorAll(`.key[data-f="${f}"]`).forEach(e => e.classList.add('hl'));
-      markFinger(f, 'on');
+      markFinger(f, 'on'); updateSide(f, f === 'th' ? 'Space' : HOME[f]);
       setMsg(`いま光っているのは <b>${FINGERS[f]}</b> の担当キー`, true);
     };
     step(); introTimer = setInterval(step, 1300);
@@ -563,11 +696,15 @@ function update(){
   if (pos >= target.length) return;
   const hint = isIntro ? 'full' : save.hint;
   const show = hint === 'full' || hint === 'nolabel' || (hint === 'onmiss' && missedCurrent);
-  if (!show){ g.insertAdjacentHTML('beforeend', '<span class="plus">ヒント非表示中 — 指の位置を思い出して打ちましょう</span>'); return; }
+  if (!show){
+    g.insertAdjacentHTML('beforeend', '<span class="plus">ヒント非表示中 — 指の位置を思い出して打ちましょう</span>');
+    $('side').innerHTML = ''; $('sideTitle').textContent = '横から見た指'; $('sideCap').textContent = '';
+    return;
+  }
   const c = target[pos], info = charMap[c];
   if (!info){ g.insertAdjacentHTML('beforeend', `「${esc(c)}」`); return; }
   const k = info.k;
-  markKey(k.code, 'target'); markFinger(k.f, 'on', k.code);
+  markKey(k.code, 'target'); markFinger(k.f, 'on', k.code); updateSide(k.f, k.code);
   const keyName = c === ' ' ? 'スペース' : (/[a-z]/i.test(c) ? c.toUpperCase() : c);
   let html = `<span class="chip" data-f="${k.f}">${FINGERS[k.f]}</span> で <span class="keycap">${esc(keyName)}</span>`;
   if (info.shift){
