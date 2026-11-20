@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>指ナビ タイピング</title>
+<meta name="description" content="次に押すキーと、どの指で押すかを画面で教えてくれるブラインドタッチ練習サイト">
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#1f2328; --muted:#6b7280; --line:#e3e1da;
+  --accent:#2f6fed; --accent-soft:#dfe8fd; --bad:#e5484d; --bad-soft:#fde4e4; --good:#2a9d63;
+  --key:#fbfaf7; --hand:#f3e7da;
+  --f-p:#cdbaf5; --f-r:#a9cdf5; --f-m:#aee3c0; --f-i:#ffd59a; --f-t:#dcd8cf;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --panel:#1e2126; --ink:#e8e6e1; --muted:#9aa0a8; --line:#30343b;
+    --accent:#6d9bff; --accent-soft:#25324d; --bad:#ff6b6e; --bad-soft:#4a2224; --good:#4cc68a;
+    --key:#262a30; --hand:#3a332c;
+    --f-p:#56478a; --f-r:#2d5884; --f-m:#2e6a48; --f-i:#86602a; --f-t:#3c3f45;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a; --panel:#1e2126; --ink:#e8e6e1; --muted:#9aa0a8; --line:#30343b;
+  --accent:#6d9bff; --accent-soft:#25324d; --bad:#ff6b6e; --bad-soft:#4a2224; --good:#4cc68a;
+  --key:#262a30; --hand:#3a332c;
+  --f-p:#56478a; --f-r:#2d5884; --f-m:#2e6a48; --f-i:#86602a; --f-t:#3c3f45;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:12px}
+h1{font-size:22px;margin:0;letter-spacing:.02em}
+h1 small{font-size:13px;color:var(--muted);font-weight:normal;margin-left:8px}
+.settings{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;align-items:center}
+.settings label{display:flex;align-items:center;gap:4px;color:var(--muted)}
+select,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+button{cursor:pointer}
+button:hover{border-color:var(--accent)}
+.lessons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.lessons button{padding:6px 10px;font-size:13px}
+.lessons button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lessons .best{font-size:11px;opacity:.75;margin-left:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.guide{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-height:44px;font-size:18px;margin-bottom:8px}
+.chip{display:inline-block;padding:2px 12px;border-radius:999px;background:var(--fc,var(--key));border:1px solid var(--line);font-weight:bold}
+.keycap{display:inline-block;min-width:36px;text-align:center;padding:2px 8px;border-radius:8px;border:2px solid var(--accent);font-weight:bold;font-family:ui-monospace,Consolas,monospace;font-size:20px}
+.guide .plus{color:var(--muted);font-size:15px}
+.msg{min-height:22px;font-size:14px;color:var(--bad)}
+.msg.info{color:var(--muted)}
+.text{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:28px;line-height:1.25;
+  padding:8px 4px 12px;word-break:normal;min-height:100px}
+.tok{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:bottom;margin-bottom:8px}
+.kana{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;font-size:14px;color:var(--muted);padding-left:2px}
+.ch{display:inline-block;border-radius:4px;padding:0 1px;border-bottom:3px solid transparent}
+.ch.sp{color:var(--line)}
+.ch.done{color:var(--muted)}
+.ch.done.err{color:var(--bad)}
+.ch.cur{background:var(--accent-soft);border-bottom-color:var(--accent);color:var(--ink)}
+.ch.cur.err{background:var(--bad-soft);border-bottom-color:var(--bad)}
+.text.shake{animation:shake .18s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.live{display:flex;gap:18px;font-size:13px;color:var(--muted);align-items:center;flex-wrap:wrap}
+.live b{color:var(--ink);font-size:16px}
+.bar{flex:1;min-width:120px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s}
+.ime{display:none;margin:8px 0;padding:8px 12px;border-radius:8px;background:var(--bad-soft);color:var(--ink);font-size:14px}
+.ime.show{display:block}
+
+/* keyboard */
+.kbwrap{margin-top:12px;overflow:hidden}
+.kb{--u:clamp(22px, calc((100vw - 64px) / 15), 58px);width:calc(var(--u) * 15);margin:0 auto;user-select:none}
+.kb-row{display:flex}
+.key{position:relative;width:calc(var(--u) * var(--w) - 4px);height:calc(var(--u) - 4px);margin:2px;border-radius:7px;
+  background:var(--fc,var(--key));border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+  flex-direction:column;font-size:calc(var(--u) * .36);font-family:ui-monospace,Consolas,monospace;transition:transform .08s}
+.key .top{font-size:.62em;opacity:.7;line-height:1}
+.key .bot{line-height:1.1}
+.key.mod{font-size:calc(var(--u) * .22);font-family:inherit;color:var(--muted)}
+.key.nofinger{background:var(--key);opacity:.6}
+.key.bump::after{content:"";position:absolute;bottom:14%;width:28%;height:2px;border-radius:1px;background:var(--ink);opacity:.6}
+.kb.nolabel .key .lbl{visibility:hidden}
+.key.target{outline:3px solid var(--accent);outline-offset:1px;transform:translateY(-2px);z-index:2;animation:pulse 1s infinite}
+.key.target2{outline:3px dashed var(--accent);outline-offset:1px;z-index:2}
+@keyframes pulse{50%{outline-color:transparent}}
+.key.hit-ok{background:var(--good);color:#fff}
+.key.hit-ng{background:var(--bad);color:#fff}
+[data-f$="p"]{--fc:var(--f-p)} [data-f$="r"]{--fc:var(--f-r)}
+[data-f$="m"]{--fc:var(--f-m)} [data-f$="i"]{--fc:var(--f-i)} [data-f="th"]{--fc:var(--f-t)}
+
+/* hands */
+.hands{display:block;width:100%;max-width:560px;margin:8px auto 0}
+.hands .palm{fill:var(--hand);stroke:var(--line);stroke-width:2}
+.hands .finger rect{fill:var(--fc);stroke:var(--line);stroke-width:2;opacity:.6;transition:all .1s}
+.hands .finger text{font:bold 15px ui-monospace,Consolas,monospace;fill:var(--ink);text-anchor:middle;opacity:.75}
+.hands .finger.on rect{opacity:1;stroke:var(--accent);stroke-width:4}
+.hands .finger.on text{opacity:1}
+.hands .finger.on2 rect{opacity:1;stroke:var(--accent);stroke-width:3;stroke-dasharray:6 4}
+.hands .side{font-size:14px;fill:var(--muted);text-anchor:middle}
+.hidden{display:none!important}
+
+.tips{margin-top:14px;font-size:13px;color:var(--muted)}
+.tips summary{cursor:pointer;color:var(--ink)}
+.tips li{margin:2px 0}
+
+/* result */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal.show{display:flex}
+.modal .card{max-width:420px;width:100%;text-align:center}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.res div{background:var(--bg);border-radius:10px;padding:8px}
+.res b{display:block;font-size:24px}
+.res span{font-size:12px;color:var(--muted)}
+.weak{font-size:14px;margin:8px 0;min-height:20px}
+.btns{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.btns button{padding:8px 14px}
+.btns .primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.kbd{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>指ナビ タイピング<small>次のキーと「どの指で押すか」を表示します</small></h1>
+    <div class="settings">
+      <label>配列 <select id="layoutSel"><option value="jis">日本語(JIS)</option><option value="us">英語(US)</option></select></label>
+      <label>ヒント <select id="hintSel">
+        <option value="full">全部表示</option>
+        <option value="nolabel">キーの文字を隠す</option>
+        <option value="onmiss">ミスした時だけ</option>
+        <option value="none">なし(本番)</option>
+      </select></label>
+      <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
+    </div>
+  </header>
+
+  <nav class="lessons" id="lessons"></nav>
+
+  <div class="card">
+    <div class="guide" id="guide"></div>
+    <div class="ime" id="ime">日本語入力がオンになっています。<b>半角/全角</b>キーを押して英数入力にしてください。</div>
+    <div class="text" id="text"></div>
+    <div class="msg info" id="msg">F と J の突起に人差し指をのせて、ホームポジションから始めましょう。手元は見ずに画面を見て打ちます。</div>
+    <div class="live">
+      <span>速度 <b id="lvSpeed">0</b> 打/分</span>
+      <span>正確率 <b id="lvAcc">100</b>%</span>
+      <span>ミス <b id="lvMiss">0</b></span>
+      <div class="bar"><i id="lvBar"></i></div>
+      <button id="restartBtn" title="Esc">やり直す (Esc)</button>
+    </div>
+    <div class="kbwrap"><div class="kb" id="kb"></div></div>
+    <svg class="hands" id="hands" viewBox="0 0 600 245" aria-label="指の図"></svg>
+  </div>
+
+  <details class="tips">
+    <summary>上達のコツ</summary>
+    <ul>
+      <li>指は打ったらすぐホームポジション(A S D F / J K L ;)に戻す。F と J の突起で手元を見ずに位置がわかります。</li>
+      <li>最初は速さより正確さ。正確率95%以上を保てるようになってから速くしましょう。</li>
+      <li>大文字や記号は、押すキーと<b>反対の手の小指</b>で Shift を押します。</li>
+      <li>慣れてきたら「ヒント」を「キーの文字を隠す」→「ミスした時だけ」→「なし」と段階的に減らすと、本当に見ずに打てるようになります。</li>
+      <li>目安: 100打/分=ふつう、200打/分=速い、300打/分以上=上級。</li>
+    </ul>
+  </details>
+</div>
+
+<div class="modal" id="modal">
+  <div class="card">
+    <h2 style="margin:4px 0 0;font-size:20px" id="resTitle">おつかれさま!</h2>
+    <div class="res">
+      <div><b id="resSpeed">0</b><span>打/分</span></div>
+      <div><b id="resAcc">0</b><span>正確率 %</span></div>
+      <div><b id="resTime">0</b><span>秒</span></div>
+    </div>
+    <div class="weak" id="resWeak"></div>
+    <div class="kbd" id="resBest"></div>
+    <div class="btns">
+      <button class="primary" id="againBtn">もう一回 <span class="kbd" style="color:inherit">Space</span></button>
+      <button id="nextBtn">次のレッスン <span class="kbd">Enter</span></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 指の定義 =====
+const FINGERS = {
+  lp:'左手・小指', lr:'左手・薬指', lm:'左手・中指', li:'左手・人差し指', th:'親指',
+  ri:'右手・人差し指', rm:'右手・中指', rr:'右手・薬指', rp:'右手・小指'
+};
+// キー定義: code は KeyboardEvent.code と同じ
+function K(code, base, shift, f, w = 1, label){ return {code, base, shift, f, w, label}; }
+const L = (c, f) => K('Key' + c.toUpperCase(), c, c.toUpperCase(), f);
+const D = (n, s, f) => K('Digit' + n, n, s, f);
+const M = (code, label, w, f = null) => K(code, null, null, f, w, label);
+
+const LAYOUTS = {
+  jis: [
+    [M('Backquote','半/全',1,'lp'), D('1','!','lp'), D('2','"','lr'), D('3','#','lm'), D('4','$','li'), D('5','%','li'),
+     D('6','&','ri'), D('7',"'",'ri'), D('8','(','rm'), D('9',')','rr'), D('0','','rp'),
+     K('Minus','-','=','rp'), K('Equal','^','~','rp'), K('IntlYen','\\','|','rp',1,'¥'), M('Backspace','BS',1,'rp')],
+    [M('Tab','Tab',1.5,'lp'), L('q','lp'), L('w','lr'), L('e','lm'), L('r','li'), L('t','li'),
+     L('y','ri'), L('u','ri'), L('i','rm'), L('o','rr'), L('p','rp'),
+     K('BracketLeft','@','`','rp'), K('BracketRight','[','{','rp'), M('Enter','Enter',1.5,'rp')],
+    [M('CapsLock','Caps',1.75,'lp'), L('a','lp'), L('s','lr'), L('d','lm'), L('f','li'), L('g','li'),
+     L('h','ri'), L('j','ri'), L('k','rm'), L('l','rr'),
+     K('Semicolon',';','+','rp'), K('Quote',':','*','rp'), K('Backslash',']','}','rp'), M('Enter','',1.25,'rp')],
+    [M('ShiftLeft','Shift',2.25,'lp'), L('z','lp'), L('x','lr'), L('c','lm'), L('v','li'), L('b','li'),
+     L('n','ri'), L('m','ri'), K('Comma',',','<','rm'), K('Period','.','>','rr'), K('Slash','/','?','rp'),
+     K('IntlRo','\\','_','rp',1,'\\'), M('ShiftRight','Shift',1.75,'rp')],
+    [M('ControlLeft','Ctrl',1.5), M('MetaLeft','Win',1.25), M('AltLeft','Alt',1.25), M('NonConvert','無変換',1.25),
+     K('Space',' ',null,'th',4.5,''), M('Convert','変換',1.25), M('KanaMode','かな',1.25), M('AltRight','Alt',1.25), M('ControlRight','Ctrl',1.5)]
+  ],
+  us: [
+    [K('Backquote','`','~','lp'), D('1','!','lp'), D('2','@','lr'), D('3','#','lm'), D('4','$','li'), D('5','%','li'),
+     D('6','^','ri'), D('7','&','ri'), D('8','*','rm'), D('9','(','rr'), D('0',')','rp'),
+     K('Minus','-','_','rp'), K('Equal','=','+','rp'), M('Backspace','BS',2,'rp')],
+    [M('Tab','Tab',1.5,'lp'), L('q','lp'), L('w','lr'), L('e','lm'), L('r','li'), L('t','li'),
+     L('y','ri'), L('u','ri'), L('i','rm'), L('o','rr'), L('p','rp'),
+     K('BracketLeft','[','{','rp'), K('BracketRight',']','}','rp'), K('Backslash','\\','|','rp',1.5)],
+    [M('CapsLock','Caps',1.75,'lp'), L('a','lp'), L('s','lr'), L('d','lm'), L('f','li'), L('g','li'),
+     L('h','ri'), L('j','ri'), L('k','rm'), L('l','rr'),
+     K('Semicolon',';',':','rp'), K('Quote',"'",'"','rp'), M('Enter','Enter',2.25,'rp')],
+    [M('ShiftLeft','Shift',2.25,'lp'), L('z','lp'), L('x','lr'), L('c','lm'), L('v','li'), L('b','li'),
+     L('n','ri'), L('m','ri'), K('Comma',',','<','rm'), K('Period','.','>','rr'), K('Slash','/','?','rp'),
+     M('ShiftRight','Shift',2.75,'rp')],
+    [M('ControlLeft','Ctrl',1.5), M('MetaLeft','Win',1.25), M('AltLeft','Alt',1.25),
+     K('Space',' ',null,'th',7,''), M('AltRight','Alt',1.25), M('Fn','Fn',1.25), M('ControlRight','Ctrl',1.5)]
+  ]
+};
+
+// ===== 練習データ =====
+const WORDS = 'the and you that was for are with his they this have from one had word but not what all were when your can said there use each which she how their will other about out many then them these some her would make like him into time has look two more write see number way could people than first water been call who now find long down day did get come made may part apple music light sound paper river house green happy quick jump zero quiz box very keyboard finger practice school friend world night table window orange yellow'.split(' ');
+const SENTENCES = [
+  'The quick brown fox jumps over the lazy dog.',
+  'Practice makes perfect.',
+  'Keep your eyes on the screen, not on your hands.',
+  'I like to listen to music in the evening.',
+  'Typing without looking is a skill you can learn.',
+  'Jackdaws love my big sphinx of quartz.',
+  'She sells sea shells by the sea shore.',
+  'Return your fingers to the home position.',
+  'My favorite season is autumn, because the air is cool.',
+  'Slow and steady wins the race.'
+];
+const ROMAJI = [
+  ['さくら','sakura'],['ねこ','neko'],['いぬ','inu'],['やま','yama'],['かわ','kawa'],['そら','sora'],['はな','hana'],
+  ['みず','mizu'],['うみ','umi'],['ともだち','tomodachi'],['せんせい','sensei'],['がっこう','gakkou'],['ひこうき','hikouki'],
+  ['じてんしゃ','jitensha'],['でんしゃ','densha'],['たまご','tamago'],['りんご','ringo'],['きもの','kimono'],['でんき','denki'],
+  ['おちゃ','ocha'],['きっぷ','kippu'],['しゅくだい','shukudai'],['べんきょう','benkyou'],['とうきょう','toukyou'],
+  ['ありがとう','arigatou'],['おはよう','ohayou'],['すし','sushi'],['てんぷら','tenpura'],['かいしゃ','kaisha'],
+  ['けいたい','keitai'],['つくえ','tsukue'],['ふゆ','fuyu'],['なつ','natsu'],['はる','haru'],['よる','yoru'],
+  ['ひかり','hikari'],['おんがく','ongaku'],['ちきゅう','chikyuu'],['れんしゅう','renshuu'],['きーぼーど','ki-bo-do'],
+  ['こーひー','ko-hi-'],['けーき','ke-ki'],['じっけん','jikken'],['けんきゅう','kenkyuu'],['ゆびさき','yubisaki']
+];
+const LESSONS = [
+  {id:'home',  title:'1 ホーム段',    type:'keys', pool:'asdfjkl;', focus:'asdfjkl;'},
+  {id:'gh',    title:'2 G と H',      type:'keys', pool:'asdfghjkl;', focus:'gh'},
+  {id:'top',   title:'3 上段',        type:'keys', pool:'asdfghjkl;qwertyuiop', focus:'qwertyuiop'},
+  {id:'bottom',title:'4 下段',        type:'keys', pool:'asdfghjkl;qwertyuiopzxcvbnm,.', focus:'zxcvbnm,.'},
+  {id:'words', title:'5 英単語',      type:'words'},
+  {id:'romaji',title:'6 ローマ字',    type:'romaji'},
+  {id:'num',   title:'7 数字',        type:'keys', pool:'1234567890', focus:'1234567890'},
+  {id:'sent',  title:'8 英文(大文字・記号)', type:'sentences'},
+  {id:'weak',  title:'★ 苦手キー',    type:'weak'}
+];
+
+// ===== 保存 (ブラウザ内のみ) =====
+const STORE_KEY = 'yubinavi-v1';
+let save = {layout:null, hint:'full', strict:true, lesson:'home', miss:{}, hits:{}, best:{}};
+try { Object.assign(save, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch(e) {}
+function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e) {} }
+
+// ===== 状態 =====
+const $ = id => document.getElementById(id);
+let layout = save.layout || 'jis';
+let charMap = {}, keyByCode = {};
+let lessonIdx = Math.max(0, LESSONS.findIndex(l => l.id === save.lesson));
+let target = '', chars = [], pos = 0;
+let startTime = 0, correct = 0, misses = 0, roundMiss = {}, missedCurrent = false, errAt = new Set();
+let modalOpenAt = 0, timer = null;
+
+function buildMaps(){
+  charMap = {}; keyByCode = {};
+  for (const row of LAYOUTS[layout]) for (const k of row){
+    if (!keyByCode[k.code]) keyByCode[k.code] = k;
+    if (k.base != null && !(k.base in charMap)) charMap[k.base] = {k, shift:false};
+    if (k.shift && !(k.shift in charMap)) charMap[k.shift] = {k, shift:true};
+  }
+}
+
+// ===== キーボード描画 =====
+function renderKeyboard(){
+  const kb = $('kb'); kb.innerHTML = '';
+  for (const row of LAYOUTS[layout]){
+    const r = document.createElement('div'); r.className = 'kb-row';
+    for (const k of row){
+      const d = document.createElement('div');
+      d.className = 'key'; d.dataset.code = k.code; d.style.setProperty('--w', k.w);
+      if (k.f) d.dataset.f = k.f; else d.classList.add('nofinger');
+      const isLetter = k.base && /^[a-z]$/.test(k.base);
+      if (k.base == null || k.code === 'Space'){
+        d.classList.add('mod'); d.innerHTML = `<span class="lbl">${k.label ?? ''}</span>`;
+      } else if (isLetter){
+        d.innerHTML = `<span class="lbl">${k.base.toUpperCase()}</span>`;
+      } else {
+        const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+        d.innerHTML = `<span class="lbl top">${esc(k.shift)}</span><span class="lbl bot">${esc(k.label ?? k.base)}</span>`;
+      }
+      if (k.code === 'KeyF' || k.code === 'KeyJ') d.classList.add('bump');
+      d.title = k.f ? FINGERS[k.f] : '';
+      r.appendChild(d);
+    }
+    kb.appendChild(r);
+  }
+}
+
+// ===== 手の図 =====
+function renderHands(){
+  const W = 600;
+  const LEFT = [
+    {f:'lp', x:44,  y:80, w:34, h:100, key:'A'},
+    {f:'lr', x:84,  y:46, w:36, h:130, key:'S'},
+    {f:'lm', x:126, y:30, w:36, h:146, key:'D'},
+    {f:'li', x:168, y:50, w:36, h:126, key:'F'}
+  ];
+  const RKEY = {lp:';', lr:'L', lm:'K', li:'J'};
+  let s = '';
+  for (const side of ['L','R']){
+    const mx = (x, w) => side === 'L' ? x : W - x - w;
+    // 親指
+    const tx = mx(196, 34), rot = side === 'L' ? 38 : -38, cx = side === 'L' ? 213 : W - 213;
+    s += `<g class="finger" data-f="th" data-side="${side}"><rect x="${tx}" y="112" width="34" height="96" rx="17" transform="rotate(${rot} ${cx} 205)"/></g>`;
+    for (const g of LEFT){
+      const f = side === 'L' ? g.f : 'r' + g.f[1];
+      const key = side === 'L' ? g.key : RKEY[g.f];
+      const x = mx(g.x, g.w);
+      s += `<g class="finger" data-f="${f}"><rect x="${x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="17"/>` +
+           `<text x="${x + g.w/2}" y="${g.y + 24}">${key}</text></g>`;
+    }
+    s += `<rect class="palm" x="${mx(40,168)}" y="122" width="168" height="94" rx="38"/>`;
+    s += `<text class="side" x="${side === 'L' ? 124 : W - 124}" y="238">${side === 'L' ? '左手' : '右手'}</text>`;
+  }
+  $('hands').innerHTML = s;
+}
+
+// ===== 問題作成 =====
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+function weakChars(pool){
+  const list = Object.keys(save.miss).filter(c => /^[a-z0-9;,.\-]$/.test(c) && (!pool || pool.includes(c)))
+    .map(c => ({c, r: save.miss[c] / ((save.hits[c] || 0) + save.miss[c])}))
+    .filter(o => save.miss[o.c] >= 2).sort((a,b) => b.r - a.r);
+  return list.slice(0, 8).map(o => o.c);
+}
+function genKeys(pool, focus, len = 48){
+  const weak = weakChars(pool);
+  const toks = []; let total = 0;
+  while (total < len){
+    const n = 2 + rnd(4); let w = '';
+    for (let i = 0; i < n; i++){
+      let c, r = Math.random();
+      do {
+        c = r < 0.55 ? pick(focus) : (r < 0.7 && weak.length ? pick(weak) : pick(pool));
+      } while (w.length >= 2 && w[w.length-1] === c && w[w.length-2] === c);
+      w += c;
+    }
+    toks.push({text:w}); total += n + 1;
+  }
+  return toks;
+}
+function makeTokens(lesson){
+  if (lesson.type === 'keys') return genKeys(lesson.pool, lesson.focus);
+  if (lesson.type === 'words'){
+    const t = []; let n = 0;
+    while (n < 55){ const w = pick(WORDS); t.push({text:w}); n += w.length + 1; }
+    return t;
+  }
+  if (lesson.type === 'romaji'){
+    const t = []; let n = 0;
+    while (n < 50){ const [k, r] = pick(ROMAJI); t.push({text:r, label:k}); n += r.length + 1; }
+    return t;
+  }
+  if (lesson.type === 'sentences'){
+    let s = pick(SENTENCES); let tries = 0;
+    while (s.length < 60 && tries++ < 10){ const n = pick(SENTENCES); if (!s.includes(n)) s += ' ' + n; }
+    return s.split(' ').map(w => ({text:w}));
+  }
+  if (lesson.type === 'weak'){
+    const w = weakChars();
+    if (w.length < 2) return genKeys('asdfghjkl;qwertyuiopzxcvbnm', 'asdfghjkl;qwertyuiopzxcvbnm');
+    return genKeys(w.join('') + 'asdfjkl', w.join(''));
+  }
+}
+
+// ===== ラウンド =====
+function newRound(){
+  const lesson = LESSONS[lessonIdx];
+  const toks = makeTokens(lesson);
+  const box = $('text'); box.innerHTML = '';
+  chars = []; target = '';
+  toks.forEach((t, i) => {
+    const tok = document.createElement('span'); tok.className = 'tok';
+    if (t.label){ const k = document.createElement('span'); k.className = 'kana'; k.textContent = t.label; tok.appendChild(k); }
+    else if (lesson.type === 'romaji'){ tok.appendChild(Object.assign(document.createElement('span'), {className:'kana', textContent:' '})); }
+    const line = document.createElement('span');
+    const text = t.text + (i < toks.length - 1 ? ' ' : '');
+    for (const c of text){
+      const s = document.createElement('span'); s.className = 'ch' + (c === ' ' ? ' sp' : '');
+      s.textContent = c === ' ' ? '␣' : c;
+      line.appendChild(s); chars.push(s); target += c;
+    }
+    tok.appendChild(line); box.appendChild(tok);
+  });
+  pos = 0; startTime = 0; correct = 0; misses = 0; roundMiss = {}; errAt = new Set(); missedCurrent = false;
+  clearInterval(timer); timer = null;
+  setMsg(lesson.type === 'romaji' ? 'ひらがなを見てローマ字で打ちます(英数入力のまま)。「ー」は - キー。' :
+         'F と J の突起に人差し指をのせて、手元を見ずに打ちましょう。', true);
+  updateLive(); update();
+}
+
+function update(){
+  chars.forEach((s, i) => s.classList.toggle('cur', i === pos));
+  document.querySelectorAll('.key.target,.key.target2').forEach(k => k.classList.remove('target','target2'));
+  document.querySelectorAll('.finger.on,.finger.on2').forEach(k => k.classList.remove('on','on2'));
+  const g = $('guide'); g.innerHTML = '';
+  if (pos >= target.length) return;
+  const hint = save.hint;
+  const show = hint === 'full' || hint === 'nolabel' || (hint === 'onmiss' && missedCurrent);
+  if (!show){ g.innerHTML = '<span class="plus">ヒント非表示中 — 指の位置を思い出して打ちましょう</span>'; return; }
+  const c = target[pos], info = charMap[c];
+  if (!info){ g.textContent = `「${c}」`; return; }
+  const k = info.k;
+  document.querySelectorAll(`.key[data-code="${k.code}"]`).forEach(e => e.classList.add('target'));
+  markFinger(k.f, 'on');
+  const keyName = c === ' ' ? 'スペース' : (/[a-z]/i.test(c) ? c.toUpperCase() : c);
+  let html = `<span class="chip" data-f="${k.f}">${FINGERS[k.f]}</span> で <span class="keycap">${escapeHtml(keyName)}</span>`;
+  if (info.shift){
+    const left = k.f[0] === 'l';
+    const sc = left ? 'ShiftRight' : 'ShiftLeft', sf = left ? 'rp' : 'lp';
+    document.querySelectorAll(`.key[data-code="${sc}"]`).forEach(e => e.classList.add('target2'));
+    markFinger(sf, 'on2');
+    html += ` <span class="plus">＋ <span class="chip" data-f="${sf}">${FINGERS[sf]}</span> で Shift を押しながら</span>`;
+  }
+  g.innerHTML = html;
+}
+function markFinger(f, cls){
+  document.querySelectorAll(`.finger[data-f="${f}"]`).forEach(e => e.classList.add(cls));
+}
+const escapeHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function setMsg(t, info){ const m = $('msg'); m.innerHTML = t; m.className = 'msg' + (info ? ' info' : ''); }
+function flashKey(code, ok){
+  document.querySelectorAll(`.key[data-code="${code}"]`).forEach(e => {
+    e.classList.add(ok ? 'hit-ok' : 'hit-ng'); setTimeout(() => e.classList.remove('hit-ok','hit-ng'), 160);
+  });
+}
+function updateLive(){
+  const min = startTime ? (performance.now() - startTime) / 60000 : 0;
+  $('lvSpeed').textContent = min > 0.02 ? Math.round(correct / min) : 0;
+  $('lvAcc').textContent = correct + misses ? Math.round(correct / (correct + misses) * 100) : 100;
+  $('lvMiss').textContent = misses;
+  $('lvBar').style.width = (target.length ? pos / target.length * 100 : 0) + '%';
+}
+
+function onKey(e){
+  if ($('modal').classList.contains('show')){ modalKey(e); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') { if (e.key.length === 1 || e.key === ' ') e.target.blur(); else return; }
+  if (e.key === 'Process' || e.isComposing || e.keyCode === 229){ $('ime').classList.add('show'); e.preventDefault(); return; }
+  if (e.key === 'Escape'){ newRound(); return; }
+  if (e.key.length !== 1) return;
+  $('ime').classList.remove('show');
+  e.preventDefault();
+  autoDetectFromCode(e.code);
+  if (pos >= target.length) return;
+  if (!startTime){ startTime = performance.now(); timer = setInterval(updateLive, 250); }
+  const exp = target[pos];
+  if (e.key === exp){
+    flashKey(e.code, true);
+    correct++; save.hits[exp.toLowerCase()] = (save.hits[exp.toLowerCase()] || 0) + 1;
+    chars[pos].classList.remove('cur'); chars[pos].classList.add('done');
+    pos++; missedCurrent = false;
+    if (pos === target.length){ finish(); return; }
+    setMsg('', true);
+  } else {
+    flashKey(e.code, false);
+    misses++; const lc = exp.toLowerCase();
+    save.miss[lc] = (save.miss[lc] || 0) + 1; roundMiss[lc] = (roundMiss[lc] || 0) + 1;
+    chars[pos].classList.add('err'); errAt.add(pos); missedCurrent = true;
+    const box = $('text'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    const pk = keyByCode[e.code], info = charMap[exp];
+    if (save.hint !== 'none' && pk && pk.f && info){
+      const same = pk.f === info.k.f;
+      setMsg(`✕ いま押したのは <b>${FINGERS[pk.f]}</b> のキー。` + (same ? '指は合っています、位置が違います。' : `正しくは <b>${FINGERS[info.k.f]}</b> です。`));
+    } else setMsg('✕ ミス');
+    if (!save.strict){
+      chars[pos].classList.add('done'); pos++; missedCurrent = false;
+      if (pos === target.length){ finish(); return; }
+    }
+  }
+  updateLive(); update();
+}
+
+function finish(){
+  clearInterval(timer); timer = null; updateLive(); update(); persist();
+  const ms = performance.now() - startTime;
+  const speed = Math.round(correct / (ms / 60000));
+  const acc = Math.round(correct / (correct + misses) * 100);
+  $('resSpeed').textContent = speed; $('resAcc').textContent = acc; $('resTime').textContent = Math.round(ms / 1000);
+  const weak = Object.entries(roundMiss).sort((a,b) => b[1] - a[1]).slice(0, 3);
+  $('resWeak').innerHTML = weak.length
+    ? 'ミスが多かったキー: ' + weak.map(([c, n]) => { const i = charMap[c]; return `<b>${c === ' ' ? 'スペース' : escapeHtml(c.toUpperCase())}</b>(${i ? FINGERS[i.k.f] : ''}) ×${n}`; }).join('、 ')
+    : 'ノーミス! すばらしい。';
+  const id = LESSONS[lessonIdx].id;
+  let bestMsg = '';
+  if (acc >= 90 && speed > (save.best[id] || 0)){ save.best[id] = speed; bestMsg = '自己ベスト更新! '; persist(); renderLessons(); }
+  $('resBest').textContent = bestMsg + (save.best[id] ? `このレッスンの自己ベスト ${save.best[id]} 打/分(正確率90%以上のみ記録)` : '正確率90%以上で自己ベストに記録されます');
+  $('resTitle').textContent = acc >= 95 ? 'おつかれさま! 正確です' : acc >= 85 ? 'おつかれさま!' : 'ゆっくりで大丈夫。正確さ重視でいきましょう';
+  $('modal').classList.add('show'); modalOpenAt = performance.now();
+}
+function modalKey(e){
+  if (performance.now() - modalOpenAt < 500) { e.preventDefault(); return; }
+  if (e.key === ' '){ e.preventDefault(); closeModal(); newRound(); }
+  else if (e.key === 'Enter'){ e.preventDefault(); nextLesson(); }
+  else if (e.key === 'Escape'){ closeModal(); newRound(); }
+}
+function closeModal(){ $('modal').classList.remove('show'); }
+function nextLesson(){ closeModal(); selectLesson((lessonIdx + 1) % LESSONS.length); }
+
+// ===== レッスン・設定 =====
+function renderLessons(){
+  const nav = $('lessons'); nav.innerHTML = '';
+  LESSONS.forEach((l, i) => {
+    const b = document.createElement('button');
+    b.className = i === lessonIdx ? 'on' : '';
+    b.innerHTML = l.title + (save.best[l.id] ? `<span class="best">${save.best[l.id]}</span>` : '');
+    b.onclick = () => { b.blur(); selectLesson(i); };
+    nav.appendChild(b);
+  });
+}
+function selectLesson(i){ lessonIdx = i; save.lesson = LESSONS[i].id; persist(); renderLessons(); newRound(); }
+function setLayout(l, chosen){
+  layout = l; $('layoutSel').value = l;
+  if (chosen){ save.layout = l; persist(); }
+  buildMaps(); renderKeyboard(); applyHint(); update();
+}
+function autoDetectFromCode(code){
+  if (!save.layout && layout !== 'jis' && (code === 'IntlYen' || code === 'IntlRo')) setLayout('jis', false);
+}
+function applyHint(){
+  const h = save.hint;
+  $('kb').classList.toggle('nolabel', h !== 'full');
+  $('kb').parentElement.classList.toggle('hidden', h === 'none');
+  $('hands').classList.toggle('hidden', h === 'none');
+}
+
+$('layoutSel').onchange = e => { setLayout(e.target.value, true); e.target.blur(); };
+$('hintSel').value = save.hint;
+$('hintSel').onchange = e => { save.hint = e.target.value; persist(); applyHint(); update(); e.target.blur(); };
+$('strictChk').checked = save.strict;
+$('strictChk').onchange = e => { save.strict = e.target.checked; persist(); e.target.blur(); };
+$('restartBtn').onclick = e => { e.target.blur(); newRound(); };
+$('againBtn').onclick = () => { closeModal(); newRound(); };
+$('nextBtn').onclick = nextLesson;
+document.addEventListener('keydown', onKey);
+
+// Chrome/Edge ではキーボード配列を自動判定
+if (!save.layout && navigator.keyboard && navigator.keyboard.getLayoutMap){
+  navigator.keyboard.getLayoutMap().then(m => {
+    const v = m.get('Equal');
+    if (v === '^' && layout !== 'jis') setLayout('jis', false);
+    else if (v === '=' && layout !== 'us') setLayout('us', false);
+  }).catch(() => {});
+}
+
+buildMaps(); renderKeyboard(); renderHands(); applyHint(); renderLessons(); newRound();
+setLayout(layout, false);
+</script>
+</body>
+</html>
