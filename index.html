@@ -58,6 +58,7 @@ button:hover{border-color:var(--accent)}
 .tok.ja{margin-right:.4em}
 .kana{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;font-size:.8em;font-weight:bold;color:var(--ink);padding-left:2px;white-space:nowrap;line-height:1.3}
 .tok.ja .ch{font-size:.72em}
+.yomi{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;font-size:.48em;color:var(--muted);padding-left:2px;white-space:nowrap;line-height:1.3}
 .ch{display:inline-block;border-radius:4px;padding:0 1px;border-bottom:3px solid transparent}
 .ch.sp{color:var(--line)}
 .ch.done{color:var(--muted)}
@@ -250,57 +251,113 @@ const LAYOUTS = {
   ]
 };
 
-// ===== 文章データ =====
-// 日本語: [表示, ローマ字] の文節ごと。ローマ字は日本語入力でそのまま変換できる綴り
-// (「ん」は次が母音・y・n のときと文末は nn、「、」は , キー、「。」は . キー、「ー」は - キー)
+/// ===== 文章データ =====
+// 日本語: [表示, 読み(ひらがな)] の文節ごと。読みは日本語入力で打つとおりに書く(助詞「は」「を」「へ」もそのまま)
+// ローマ字は読みから作るので、shi/si・chi/ti・tsu/tu・n/nn など、どの打ち方でも正解になる
 const JA_SHORT = [
-  [['猫が','nekoga'],['好きです。','sukidesu.']],
-  [['空が','soraga'],['青い。','aoi.']],
-  [['水を','mizuwo'],['飲む。','nomu.']],
-  [['本を','honwo'],['読みます。','yomimasu.']],
-  [['雨が','amega'],['降る。','furu.']],
-  [['朝ごはんを','asagohanwo'],['食べた。','tabeta.']],
-  [['駅は','ekiha'],['近い。','chikai.']],
-  [['花が','hanaga'],['咲いた。','saita.']],
-  [['今日は','kyouha'],['暑い。','atsui.']],
-  [['犬と','inuto'],['歩く。','aruku.']],
-  [['お茶を','ochawo'],['どうぞ。','douzo.']],
-  [['窓を','madowo'],['開ける。','akeru.']],
-  [['手を','tewo'],['洗う。','arau.']],
-  [['夜は','yoruha'],['寒い。','samui.']],
-  [['魚が','sakanaga'],['泳ぐ。','oyogu.']],
-  [['おはよう','ohayou'],['ございます。','gozaimasu.']],
-  [['また','mata'],['明日。','ashita.']]
+  [['猫が','ねこが'],['好きです。','すきです。']],
+  [['空が','そらが'],['青い。','あおい。']],
+  [['水を','みずを'],['飲む。','のむ。']],
+  [['本を','ほんを'],['読みます。','よみます。']],
+  [['雨が','あめが'],['降る。','ふる。']],
+  [['朝ごはんを','あさごはんを'],['食べた。','たべた。']],
+  [['駅は','えきは'],['近い。','ちかい。']],
+  [['花が','はなが'],['咲いた。','さいた。']],
+  [['今日は','きょうは'],['暑い。','あつい。']],
+  [['犬と','いぬと'],['歩く。','あるく。']],
+  [['お茶を','おちゃを'],['どうぞ。','どうぞ。']],
+  [['窓を','まどを'],['開ける。','あける。']],
+  [['手を','てを'],['洗う。','あらう。']],
+  [['夜は','よるは'],['寒い。','さむい。']],
+  [['魚が','さかなが'],['泳ぐ。','およぐ。']],
+  [['おはよう','おはよう'],['ございます。','ございます。']],
+  [['また','また'],['明日。','あした。']]
 ];
 const JA_MID = [
-  [['毎朝','maiasa'],['コーヒーを','ko-hi-wo'],['飲みます。','nomimasu.']],
-  [['駅まで','ekimade'],['歩いて','aruite'],['行きます。','ikimasu.']],
-  [['週末は','shuumatsuha'],['友達と','tomodachito'],['映画を','eigawo'],['見ました。','mimashita.']],
-  [['研究室で','kenkyuushitsude'],['実験を','jikkenwo'],['しています。','shiteimasu.']],
-  [['明日は','ashitaha'],['雨が','amega'],['降るそうです。','furusoudesu.']],
-  [['手元を','temotowo'],['見ないで','minaide'],['打てるように','uteruyouni'],['なりたい。','naritai.']],
-  [['図書館で','toshokande'],['本を','honwo'],['借りました。','karimashita.']],
-  [['夏休みに','natsuyasumini'],['海へ','umihe'],['行きたい。','ikitai.']],
-  [['電車が','denshaga'],['少し','sukoshi'],['遅れています。','okureteimasu.']],
-  [['新しい','atarashii'],['パソコンを','pasokonwo'],['買いました。','kaimashita.']],
-  [['部屋の','heyano'],['電気を','denkiwo'],['消してください。','keshitekudasai.']],
-  [['冷たい','tsumetai'],['水が','mizuga'],['おいしい。','oishii.']],
-  [['先生に','senseini'],['メールを','me-ruwo'],['送りました。','okurimashita.']],
-  [['ゆっくり','yukkuri'],['正確に','seikakuni'],['打ちましょう。','uchimashou.']],
-  [['ありがとう','arigatou'],['ございました。','gozaimashita.']]
+  [['毎朝','まいあさ'],['コーヒーを','こーひーを'],['飲みます。','のみます。']],
+  [['駅まで','えきまで'],['歩いて','あるいて'],['行きます。','いきます。']],
+  [['週末は','しゅうまつは'],['友達と','ともだちと'],['映画を','えいがを'],['見ました。','みました。']],
+  [['研究室で','けんきゅうしつで'],['実験を','じっけんを'],['しています。','しています。']],
+  [['明日は','あしたは'],['雨が','あめが'],['降るそうです。','ふるそうです。']],
+  [['手元を','てもとを'],['見ないで','みないで'],['打てるように','うてるように'],['なりたい。','なりたい。']],
+  [['図書館で','としょかんで'],['本を','ほんを'],['借りました。','かりました。']],
+  [['夏休みに','なつやすみに'],['海へ','うみへ'],['行きたい。','いきたい。']],
+  [['電車が','でんしゃが'],['少し','すこし'],['遅れています。','おくれています。']],
+  [['新しい','あたらしい'],['パソコンを','ぱそこんを'],['買いました。','かいました。']],
+  [['部屋の','へやの'],['電気を','でんきを'],['消してください。','けしてください。']],
+  [['冷たい','つめたい'],['水が','みずが'],['おいしい。','おいしい。']],
+  [['先生に','せんせいに'],['メールを','めーるを'],['送りました。','おくりました。']],
+  [['ゆっくり','ゆっくり'],['正確に','せいかくに'],['打ちましょう。','うちましょう。']],
+  [['ありがとう','ありがとう'],['ございました。','ございました。']]
 ];
 const JA_LONG = [
-  [['窓を','madowo'],['開けると、','akeruto,'],['涼しい','suzushii'],['風が','kazega'],['入ってきた。','haittekita.']],
-  [['時間が','jikanga'],['あるときは、','arutokiha,'],['近くの','chikakuno'],['公園を','kouenwo'],['散歩します。','sanposhimasu.']],
-  [['来週の','raishuuno'],['発表に','happyouni'],['向けて、','mukete,'],['資料を','shiryouwo'],['準備しています。','junbishiteimasu.']],
-  [['雨が','amega'],['降っていたので、','futteitanode,'],['傘を','kasawo'],['持って','motte'],['出かけた。','dekaketa.']],
-  [['毎日','mainichi'],['少しずつ','sukoshizutsu'],['練習すれば、','renshuusureba,'],['必ず','kanarazu'],['速くなります。','hayakunarimasu.']],
-  [['駅前の','ekimaeno'],['喫茶店で、','kissatende,'],['友達と','tomodachito'],['話を','hanashiwo'],['しました。','shimashita.']],
-  [['夕方に','yuugatani'],['なると、','naruto,'],['空が','soraga'],['赤く','akaku'],['染まる。','somaru.']],
-  [['キーボードを','ki-bo-dowo'],['見ないで','minaide'],['打てると、','uteruto,'],['作業が','sagyouga'],['楽になる。','rakuninaru.']],
-  [['冬の','fuyuno'],['朝は、','asaha,'],['布団から','futonkara'],['出るのが','derunoga'],['つらい。','tsurai.']],
-  [['新しい','atarashii'],['ことを','kotowo'],['始めるときは、','hajimerutokiha,'],['少し','sukoshi'],['緊張する。','kinchousuru.']]
+  [['窓を','まどを'],['開けると、','あけると、'],['涼しい','すずしい'],['風が','かぜが'],['入ってきた。','はいってきた。']],
+  [['時間が','じかんが'],['あるときは、','あるときは、'],['近くの','ちかくの'],['公園を','こうえんを'],['散歩します。','さんぽします。']],
+  [['来週の','らいしゅうの'],['発表に','はっぴょうに'],['向けて、','むけて、'],['資料を','しりょうを'],['準備しています。','じゅんびしています。']],
+  [['雨が','あめが'],['降っていたので、','ふっていたので、'],['傘を','かさを'],['持って','もって'],['出かけた。','でかけた。']],
+  [['毎日','まいにち'],['少しずつ','すこしずつ'],['練習すれば、','れんしゅうすれば、'],['必ず','かならず'],['速くなります。','はやくなります。']],
+  [['駅前の','えきまえの'],['喫茶店で、','きっさてんで、'],['友達と','ともだちと'],['話を','はなしを'],['しました。','しました。']],
+  [['夕方に','ゆうがたに'],['なると、','なると、'],['空が','そらが'],['赤く','あかく'],['染まる。','そまる。']],
+  [['キーボードを','きーぼーどを'],['見ないで','みないで'],['打てると、','うてると、'],['作業が','さぎょうが'],['楽になる。','らくになる。']],
+  [['冬の','ふゆの'],['朝は、','あさは、'],['布団から','ふとんから'],['出るのが','でるのが'],['つらい。','つらい。']],
+  [['新しい','あたらしい'],['ことを','ことを'],['始めるときは、','はじめるときは、'],['少し','すこし'],['緊張する。','きんちょうする。']]
 ];
+
+// ===== かな → ローマ字 (よく使う打ち方はどれでも正解) =====
+const KANA = {
+  'あ':['a'],'い':['i','yi'],'う':['u','wu','whu'],'え':['e'],'お':['o'],
+  'か':['ka','ca'],'き':['ki'],'く':['ku','cu','qu'],'け':['ke'],'こ':['ko','co'],
+  'さ':['sa'],'し':['shi','si','ci'],'す':['su'],'せ':['se','ce'],'そ':['so'],
+  'た':['ta'],'ち':['chi','ti'],'つ':['tsu','tu'],'て':['te'],'と':['to'],
+  'な':['na'],'に':['ni'],'ぬ':['nu'],'ね':['ne'],'の':['no'],
+  'は':['ha'],'ひ':['hi'],'ふ':['fu','hu'],'へ':['he'],'ほ':['ho'],
+  'ま':['ma'],'み':['mi'],'む':['mu'],'め':['me'],'も':['mo'],
+  'や':['ya'],'ゆ':['yu'],'よ':['yo'],
+  'ら':['ra'],'り':['ri'],'る':['ru'],'れ':['re'],'ろ':['ro'],
+  'わ':['wa'],'を':['wo'],
+  'が':['ga'],'ぎ':['gi'],'ぐ':['gu'],'げ':['ge'],'ご':['go'],
+  'ざ':['za'],'じ':['ji','zi'],'ず':['zu'],'ぜ':['ze'],'ぞ':['zo'],
+  'だ':['da'],'ぢ':['di'],'づ':['du'],'で':['de'],'ど':['do'],
+  'ば':['ba'],'び':['bi'],'ぶ':['bu'],'べ':['be'],'ぼ':['bo'],
+  'ぱ':['pa'],'ぴ':['pi'],'ぷ':['pu'],'ぺ':['pe'],'ぽ':['po'],
+  'ぁ':['xa','la'],'ぃ':['xi','li'],'ぅ':['xu','lu'],'ぇ':['xe','le'],'ぉ':['xo','lo'],
+  'ゃ':['xya','lya'],'ゅ':['xyu','lyu'],'ょ':['xyo','lyo'],'っ':['xtu','ltu','xtsu','ltsu'],
+  'ー':['-'],'、':[','],'。':['.'],'？':['?'],'！':['!']
+};
+const YOON_HEAD = {'き':['ky'],'ぎ':['gy'],'に':['ny'],'ひ':['hy'],'び':['by'],'ぴ':['py'],'み':['my'],'り':['ry'],'ぢ':['dy'],
+  'し':['sh','sy'],'ち':['ch','ty','cy'],'じ':['j','zy','jy']};
+const YOON_V = {'ゃ':'a','ゅ':'u','ょ':'o'};
+// 読みを「1音ずつの打ち方の候補」に分ける
+function kanaUnits(kana){
+  const u = [];
+  for (let i = 0; i < kana.length; i++){
+    const c = kana[i], n = kana[i + 1];
+    if (n && YOON_V[n] && YOON_HEAD[c]){
+      const cands = YOON_HEAD[c].map(h => h + YOON_V[n]);
+      for (const a of KANA[c]) for (const b of KANA[n]) cands.push(a + b);
+      u.push({kana:c + n, cands}); i++;
+    } else if (c === 'ん') u.push({kana:'ん', cands:null});
+    else u.push({kana:c, cands:(KANA[c] || [c]).slice()});
+  }
+  // ん: 次が子音なら n 1回でよい。母音・y・n の前や文末は nn
+  u.forEach((x, i) => {
+    if (x.cands) return;
+    const nx = u[i + 1];
+    x.cands = ['nn', 'xn'];
+    if (nx && nx.cands && nx.cands.every(c => /^[a-z]/.test(c) && !/^[aiueony]/.test(c))) x.cands.unshift('n');
+  });
+  // っ: 次の音の子音を重ねる (kka, tte など)。xtu / ltu も可
+  for (let i = u.length - 2; i >= 0; i--){
+    if (u[i].kana !== 'っ') continue;
+    const nx = u[i + 1];
+    const dbl = nx.cands.filter(c => /^[bcdfghjkmpqrstvwxyz]/.test(c)).map(c => c[0] + c);
+    const sep = KANA['っ'].flatMap(p => nx.cands.map(c => p + c));
+    u.splice(i, 2, {kana:'っ' + nx.kana, cands:[...dbl, ...sep]});
+  }
+  return u;
+}
+const textUnits = t => [...t].map(c => ({kana:c, cands:[c]}));
+
 const EN = [
   'The quick brown fox jumps over the lazy dog.', 'Practice makes perfect.',
   'Keep your eyes on the screen, not on your hands.', 'How are you today?',
@@ -345,7 +402,7 @@ const INTRO = [
     '<li><b>手元は見ない</b>。わからなくなったら画面の手を見る。F と J の突起で位置を確かめる</li>' +
     '<li><b>速さより正確さ</b>。正確率95%以上を保てたら、少しずつ速くする</li></ul>',
     hl:() => ({codes:['ShiftLeft','ShiftRight','Space','KeyF','KeyJ'], fingers:['lp','rp','th','li','ri']})},
-  {title:'④ 打ってみよう', practice:[[['今日は','kyouha'],['いい','ii'],['天気です。','tenkidesu.']]]}
+  {title:'④ 打ってみよう', practice:[[['今日は','きょうは'],['いい','いい'],['天気です。','てんきです。']]]}
 ];
 
 // ===== 保存 (ブラウザ内のみ) =====
@@ -360,7 +417,7 @@ let layout = save.layout || 'jis';
 let charMap = {}, keyByCode = {}, centers = {}, FG = {};
 let lessonIdx = Math.max(0, LESSONS.findIndex(l => l.id === save.lesson));
 let introPage = 0, introTimer = null;
-let target = '', chars = [], pos = 0, typing = false;
+let typing = false;
 let startTime = 0, correct = 0, misses = 0, roundMiss = {}, missedCurrent = false;
 let modalOpenAt = 0, timer = null, lastPick = '';
 
@@ -579,7 +636,7 @@ function fitText(){
   while (t.scrollHeight > box.clientHeight && fs > 11){ fs -= 1; t.style.fontSize = fs + 'px'; }
 }
 
-// ===== 出題 =====
+/// ===== 出題 =====
 function pickSentences(items, minLen, maxLen, lenOf){
   const pool = items.slice().sort(() => Math.random() - 0.5);
   if (pool.length > 1 && JSON.stringify(pool[0]) === lastPick) pool.push(pool.shift());
@@ -593,12 +650,12 @@ function pickSentences(items, minLen, maxLen, lenOf){
   lastPick = JSON.stringify(out[0]);
   return out;
 }
-const jaLen = s => s.reduce((n, c) => n + c[1].length, 0);
-const jaText = s => s.map(c => c[1]).join('');
+const jaRomaji = s => s.map(c => kanaUnits(c[1]).map(u => u.cands[0]).join('')).join('');
+const jaLen = s => jaRomaji(s).length;
 function enTokens(sentences){
-  return sentences.join(' ').split(' ').map((w, i, a) => ({text: w + (i < a.length - 1 ? ' ' : '')}));
+  return sentences.join(' ').split(' ').map((w, i, a) => ({units: textUnits(w + (i < a.length - 1 ? ' ' : ''))}));
 }
-function jaTokens(sentences){ return sentences.flat().map(([label, text]) => ({label, text})); }
+function jaTokens(sentences){ return sentences.flat().map(([label, reading]) => ({label, reading, units: kanaUnits(reading)})); }
 function weakChars(){
   return Object.keys(save.miss).filter(c => save.miss[c] >= 2)
     .sort((a, b) => save.miss[b] / ((save.hits[b]||0) + save.miss[b]) - save.miss[a] / ((save.hits[a]||0) + save.miss[a]))
@@ -610,30 +667,79 @@ function makeTokens(lesson){
   if (lesson.type === 'weak'){
     const weak = weakChars();
     const all = [...JA_SHORT, ...JA_MID, ...JA_LONG];
-    const score = s => { const t = jaText(s); return [...t].filter(c => weak.includes(c)).length / t.length; };
+    const score = s => { const t = jaRomaji(s); return [...t].filter(c => weak.includes(c)).length / t.length; };
     const top = weak.length ? all.slice().sort((a, b) => score(b) - score(a)).slice(0, 8) : JA_MID;
     return jaTokens(pickSentences(top, 40, 75, jaLen));
   }
 }
 
-function renderTokens(toks){
-  const t = $('text'); t.className = 'text'; t.innerHTML = '';
-  chars = []; target = '';
-  for (const tk of toks){
-    const tok = document.createElement('span'); tok.className = 'tok' + (tk.label ? ' ja' : '');
-    if (tk.label){ const k = document.createElement('span'); k.className = 'kana'; k.textContent = tk.label; tok.appendChild(k); }
-    const line = document.createElement('span');
-    for (const c of tk.text){
-      const s = document.createElement('span'); s.className = 'ch' + (c === ' ' ? ' sp' : '');
-      s.textContent = c === ' ' ? '␣' : c;
-      line.appendChild(s); chars.push(s); target += c;
-    }
-    tok.appendChild(line); t.appendChild(tok);
+// ===== 入力の判定 =====
+// U: 1音ずつ {kana, cands:[打ち方の候補], typed, err, tok}、ui: いまの音、buf: いまの音で打った文字
+let TOKS = [], U = [], ui = 0, buf = '';
+const isDoneAmbiguous = () => buf !== '' && U[ui] && U[ui].cands.includes(buf);   // 例: 「ん」を n まで打った
+// いま表示する打ち方 (打った文字に合う候補の先頭)
+const shownCand = u => (u === U[ui] ? (u.cands.find(c => c.startsWith(buf)) || u.cands[0]) : (u.typed ?? u.cands[0]));
+// 次に押すべき文字
+function expectedChar(){
+  const u = U[ui]; if (!u) return null;
+  if (isDoneAmbiguous() && U[ui + 1]) return U[ui + 1].cands[0][0];   // 「ん」を n まで打ったら次の音へ
+  return shownCand(u)[buf.length];
+}
+function finalizeUnit(){ U[ui].typed = buf; buf = ''; ui++; }
+// 1文字を受け取る。正しければ true
+function feed(ch){
+  const u = U[ui]; if (!u) return false;
+  const nb = buf + ch;
+  const ext = u.cands.filter(c => c.startsWith(nb));
+  if (ext.length){
+    buf = nb;
+    if (!ext.some(c => c.length > buf.length)) finalizeUnit();
+    return true;
   }
-  pos = 0; startTime = 0; correct = 0; misses = 0; roundMiss = {}; missedCurrent = false; typing = true;
+  if (isDoneAmbiguous()){             // 「ん」を n で確定して、次の音へ
+    const save_ui = ui, save_buf = buf;
+    finalizeUnit();
+    if (ui < U.length && feed(ch)) return true;
+    ui = save_ui; buf = save_buf; U[ui].typed = undefined;
+  }
+  return false;
+}
+
+function renderTokens(toks){
+  TOKS = toks; U = [];
+  toks.forEach((tk, ti) => tk.units.forEach(u => { u.tok = ti; u.typed = undefined; u.err = false; U.push(u); }));
+  ui = 0; buf = '';
+  startTime = 0; correct = 0; misses = 0; roundMiss = {}; missedCurrent = false; typing = true;
   clearInterval(timer); timer = null;
   $('live').classList.remove('hidden');
-  updateLive(); update(); fitText();
+  drawText(); updateLive(); update(); fitText();
+}
+// 文章を描く: 漢字 / ひらがな / ローマ字(打ち方に合わせて変わる)
+function drawText(){
+  const t = $('text'); t.className = 'text'; t.innerHTML = '';
+  const anyJa = TOKS.some(tk => tk.label);
+  let curPlaced = false;
+  TOKS.forEach((tk, ti) => {
+    const tok = document.createElement('span'); tok.className = 'tok' + (anyJa ? ' ja' : '');
+    if (anyJa){
+      tok.insertAdjacentHTML('beforeend', `<span class="kana">${esc(tk.label || '')}</span>` +
+        `<span class="yomi">${tk.reading && tk.reading !== tk.label ? esc(tk.reading) : '&nbsp;'}</span>`);
+    }
+    const line = document.createElement('span');
+    U.forEach((u, i) => {
+      if (u.tok !== ti) return;
+      const str = shownCand(u);
+      [...str].forEach((c, j) => {
+        const s = document.createElement('span');
+        let cls = 'ch' + (c === ' ' ? ' sp' : '');
+        if (i < ui || (i === ui && j < buf.length)) cls += ' done' + (u.err ? ' err' : '');
+        else if (!curPlaced){ cls += ' cur' + (missedCurrent ? ' err' : ''); curPlaced = true; }
+        s.className = cls; s.textContent = c === ' ' ? '␣' : c;
+        line.appendChild(s);
+      });
+    });
+    tok.appendChild(line); t.appendChild(tok);
+  });
 }
 
 function newRound(){
@@ -686,14 +792,13 @@ function showIntro(){
 
 // ===== 入力ガイド =====
 function update(){
-  chars.forEach((s, i) => s.classList.toggle('cur', i === pos));
   clearMarks();
   const g = $('guide');
   const isIntro = LESSONS[lessonIdx].type === 'intro';
   const keep = isIntro ? g.querySelector('button') : null;
   g.innerHTML = '';
   if (keep) g.appendChild(keep);
-  if (pos >= target.length) return;
+  if (ui >= U.length) return;
   const hint = isIntro ? 'full' : save.hint;
   const show = hint === 'full' || hint === 'nolabel' || (hint === 'onmiss' && missedCurrent);
   if (!show){
@@ -701,7 +806,7 @@ function update(){
     $('side').innerHTML = ''; $('sideTitle').textContent = '横から見た指'; $('sideCap').textContent = '';
     return;
   }
-  const c = target[pos], info = charMap[c];
+  const c = expectedChar(), info = charMap[c];
   if (!info){ g.insertAdjacentHTML('beforeend', `「${esc(c)}」`); return; }
   const k = info.k;
   markKey(k.code, 'target'); markFinger(k.f, 'on', k.code); updateSide(k.f, k.code);
@@ -726,7 +831,7 @@ function updateLive(){
   $('lvSpeed').textContent = min > 0.02 ? Math.round(correct / min) : 0;
   $('lvAcc').textContent = correct + misses ? Math.round(correct / (correct + misses) * 100) : 100;
   $('lvMiss').textContent = misses;
-  $('lvBar').style.width = (target.length ? pos / target.length * 100 : 0) + '%';
+  $('lvBar').style.width = (U.length ? ui / U.length * 100 : 0) + '%';
 }
 
 function onKey(e){
@@ -745,30 +850,31 @@ function onKey(e){
   if (e.key.length !== 1) return;
   e.preventDefault();
   if (!save.layout && layout !== 'jis' && (e.code === 'IntlYen' || e.code === 'IntlRo')) setLayout('jis', false);
-  if (pos >= target.length) return;
+  if (ui >= U.length) return;
   if (!startTime){ startTime = performance.now(); timer = setInterval(updateLive, 250); }
-  const exp = target[pos], lc = exp.toLowerCase();
-  if (e.key === exp){
+  const exp = expectedChar(), lc = exp.toLowerCase();
+  if (feed(e.key)){
     flashKey(e.code, true);
-    correct++; save.hits[lc] = (save.hits[lc] || 0) + 1;
-    chars[pos].classList.add('done'); pos++; missedCurrent = false;
-    if (pos === target.length){ finish(); return; }
+    const k = e.key.toLowerCase();
+    correct++; save.hits[k] = (save.hits[k] || 0) + 1;
+    missedCurrent = false;
+    if (ui >= U.length){ drawText(); finish(); return; }
   } else {
     flashKey(e.code, false);
     misses++; save.miss[lc] = (save.miss[lc] || 0) + 1; roundMiss[lc] = (roundMiss[lc] || 0) + 1;
-    chars[pos].classList.add('err'); missedCurrent = true;
+    U[ui].err = true; missedCurrent = true;
     const t = $('text'); t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
     const pk = keyByCode[e.code], info = charMap[exp];
     if (save.hint !== 'none' && pk && pk.f && info){
       setMsg(`✕ いま押したのは <b>${FINGERS[pk.f]}</b> のキー。` +
         (pk.f === info.k.f ? '指は合っています、位置が違います。' : `正しくは <b>${FINGERS[info.k.f]}</b> です。`));
     } else setMsg('✕ ミス');
-    if (!save.strict){
-      chars[pos].classList.add('done'); pos++; missedCurrent = false;
-      if (pos === target.length){ finish(); return; }
+    if (!save.strict){   // ミスしても進む: その音は表示どおりに打ったことにする
+      buf = shownCand(U[ui]); finalizeUnit(); missedCurrent = false;
+      if (ui >= U.length){ drawText(); finish(); return; }
     }
   }
-  updateLive(); update();
+  drawText(); updateLive(); update();
 }
 
 function finish(){
