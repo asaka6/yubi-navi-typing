@@ -140,6 +140,12 @@ button:hover{border-color:var(--accent)}
 .btns{display:flex;gap:8px;justify-content:center;margin-top:10px}
 .btns button{padding:8px 14px}
 .kbd{font-size:11px;color:var(--muted)}
+.lvtag{color:var(--ink);font-weight:bold;white-space:nowrap}
+.lvtag .dots{color:var(--accent);letter-spacing:1px;margin-left:4px}
+.lvtag.off{color:var(--muted);font-weight:normal}
+.lvres{margin:8px 0;padding:6px 10px;border-radius:10px;background:var(--bg);font-size:14px}
+.lvres:empty{display:none}
+.lvres.up{background:var(--accent-soft);font-weight:bold;font-size:16px}
 </style>
 </head>
 <body>
@@ -157,6 +163,7 @@ button:hover{border-color:var(--accent)}
           <option value="none">なし(本番)</option>
         </select></label>
         <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
+        <label title="正確率95%以上・目標速度以上を3回ためると、自動で次のレベル(長い文・ヒント少なめ)に進みます"><input type="checkbox" id="autoChk" checked> 自動レベルアップ</label>
       </div>
     </header>
     <div class="card cardrow" id="card">
@@ -171,6 +178,7 @@ button:hover{border-color:var(--accent)}
         <span>速度 <b id="lvSpeed">0</b> 打/分</span>
         <span>正確率 <b id="lvAcc">100</b>%</span>
         <span>ミス <b id="lvMiss">0</b></span>
+        <span class="lvtag" id="lvTag"></span>
         <div class="bar"><i id="lvBar"></i></div>
         <button id="restartBtn">やり直す (Esc)</button>
       </div>
@@ -197,6 +205,7 @@ button:hover{border-color:var(--accent)}
       <div><b id="resTime">0</b><span>秒</span></div>
     </div>
     <div class="weak" id="resWeak"></div>
+    <div class="lvres" id="resLevel"></div>
     <div class="kbd" id="resBest"></div>
     <div class="btns">
       <button class="primary" id="againBtn">次の文章 <span class="kbd" style="color:inherit">Space</span></button>
@@ -272,7 +281,64 @@ const JA_SHORT = [
   [['夜は','よるは'],['寒い。','さむい。']],
   [['魚が','さかなが'],['泳ぐ。','およぐ。']],
   [['おはよう','おはよう'],['ございます。','ございます。']],
-  [['また','また'],['明日。','あした。']]
+  [['また','また'],['明日。','あした。']],
+  [['電話が','でんわが'],['鳴った。','なった。']],
+  [['靴を','くつを'],['はく。','はく。']],
+  [['星が','ほしが'],['きれいだ。','きれいだ。']],
+  [['歯を','はを'],['みがく。','みがく。']],
+  [['鳥が','とりが'],['鳴いている。','ないている。']],
+  [['風が','かぜが'],['強い。','つよい。']],
+  [['ドアを','どあを'],['閉める。','しめる。']],
+  [['道が','みちが'],['混んでいる。','こんでいる。']],
+  [['海は','うみは'],['広い。','ひろい。']],
+  [['山に','やまに'],['登る。','のぼる。']],
+  [['パンを','ぱんを'],['焼く。','やく。']],
+  [['お湯が','おゆが'],['わいた。','わいた。']],
+  [['写真を','しゃしんを'],['撮る。','とる。']],
+  [['名前を','なまえを'],['書く。','かく。']],
+  [['いすに','いすに'],['座る。','すわる。']],
+  [['ペンを','ぺんを'],['貸して。','かして。']],
+  [['宿題が','しゅくだいが'],['終わった。','おわった。']],
+  [['部屋を','へやを'],['片づける。','かたづける。']],
+  [['お腹が','おなかが'],['すいた。','すいた。']],
+  [['少し','すこし'],['眠い。','ねむい。']],
+  [['音楽を','おんがくを'],['聴く。','きく。']],
+  [['机を','つくえを'],['拭く。','ふく。']],
+  [['電気を','でんきを'],['つける。','つける。']],
+  [['火を','ひを'],['消す。','けす。']],
+  [['野菜を','やさいを'],['切る。','きる。']],
+  [['月が','つきが'],['明るい。','あかるい。']],
+  [['雪が','ゆきが'],['積もった。','つもった。']],
+  [['かばんが','かばんが'],['重い。','おもい。']],
+  [['時計を','とけいを'],['見る。','みる。']],
+  [['旅行に','りょこうに'],['行く。','いく。']],
+  [['お店が','おみせが'],['開いた。','あいた。']],
+  [['熱が','ねつが'],['下がった。','さがった。']],
+  [['服を','ふくを'],['着る。','きる。']],
+  [['足が','あしが'],['速い。','はやい。']],
+  [['声が','こえが'],['大きい。','おおきい。']],
+  [['字が','じが'],['上手だ。','じょうずだ。']],
+  [['薬を','くすりを'],['飲む。','のむ。']],
+  [['草が','くさが'],['伸びた。','のびた。']],
+  [['船が','ふねが'],['着いた。','ついた。']],
+  [['手紙を','てがみを'],['出す。','だす。']],
+  [['ご飯を','ごはんを'],['炊く。','たく。']],
+  [['猫が','ねこが'],['寝ている。','ねている。']],
+  [['信号が','しんごうが'],['青に','あおに'],['なった。','なった。']],
+  [['りんごを','りんごを'],['むく。','むく。']],
+  [['紙を','かみを'],['折る。','おる。']],
+  [['髪を','かみを'],['切った。','きった。']],
+  [['ボールを','ぼーるを'],['投げる。','なげる。']],
+  [['テレビを','てれびを'],['見る。','みる。']],
+  [['よろしく','よろしく'],['お願いします。','おねがいします。']],
+  [['お先に','おさきに'],['失礼します。','しつれいします。']],
+  [['いただきます。','いただきます。']],
+  [['ごちそうさまでした。','ごちそうさまでした。']],
+  [['おやすみなさい。','おやすみなさい。']],
+  [['はじめまして。','はじめまして。']],
+  [['お元気ですか？','おげんきですか？']],
+  [['いってきます！','いってきます！']],
+  [['ただいま！','ただいま！']]
 ];
 const JA_MID = [
   [['毎朝','まいあさ'],['コーヒーを','こーひーを'],['飲みます。','のみます。']],
@@ -289,7 +355,50 @@ const JA_MID = [
   [['冷たい','つめたい'],['水が','みずが'],['おいしい。','おいしい。']],
   [['先生に','せんせいに'],['メールを','めーるを'],['送りました。','おくりました。']],
   [['ゆっくり','ゆっくり'],['正確に','せいかくに'],['打ちましょう。','うちましょう。']],
-  [['ありがとう','ありがとう'],['ございました。','ございました。']]
+  [['ありがとう','ありがとう'],['ございました。','ございました。']],
+  [['今日は','きょうは'],['早く','はやく'],['寝ようと','ねようと'],['思う。','おもう。']],
+  [['朝から','あさから'],['ずっと','ずっと'],['雨が','あめが'],['降っている。','ふっている。']],
+  [['昼ごはんは','ひるごはんは'],['何に','なにに'],['しますか？','しますか？']],
+  [['この','この'],['本は','ほんは'],['とても','とても'],['おもしろい。','おもしろい。']],
+  [['駅の','えきの'],['近くに','ちかくに'],['新しい','あたらしい'],['店が','みせが'],['できた。','できた。']],
+  [['毎晩','まいばん'],['日記を','にっきを'],['書いています。','かいています。']],
+  [['兄は','あには'],['料理が','りょうりが'],['得意です。','とくいです。']],
+  [['妹と','いもうとと'],['一緒に','いっしょに'],['買い物に','かいものに'],['行った。','いった。']],
+  [['授業の','じゅぎょうの'],['前に','まえに'],['予習を','よしゅうを'],['する。','する。']],
+  [['会議は','かいぎは'],['三時から','さんじから'],['始まります。','はじまります。']],
+  [['自転車で','じてんしゃで'],['学校に','がっこうに'],['通っています。','かよっています。']],
+  [['窓の','まどの'],['外を','そとを'],['見ると','みると'],['雪だった。','ゆきだった。']],
+  [['お風呂に','おふろに'],['入って','はいって'],['温まった。','あたたまった。']],
+  [['好きな','すきな'],['食べ物は','たべものは'],['カレーです。','かれーです。']],
+  [['この','この'],['道を','みちを'],['まっすぐ','まっすぐ'],['進んでください。','すすんでください。']],
+  [['父は','ちちは'],['毎朝','まいあさ'],['新聞を','しんぶんを'],['読む。','よむ。']],
+  [['公園で','こうえんで'],['子どもたちが','こどもたちが'],['遊んでいる。','あそんでいる。']],
+  [['レポートの','れぽーとの'],['締め切りは','しめきりは'],['金曜日です。','きんようびです。']],
+  [['夜空に','よぞらに'],['花火が','はなびが'],['上がった。','あがった。']],
+  [['母に','ははに'],['電話を','でんわを'],['かけました。','かけました。']],
+  [['机の','つくえの'],['上を','うえを'],['きれいに','きれいに'],['片づけた。','かたづけた。']],
+  [['大きな','おおきな'],['声で','こえで'],['歌を','うたを'],['歌った。','うたった。']],
+  [['お昼に','おひるに'],['おにぎりを','おにぎりを'],['食べた。','たべた。']],
+  [['この','この'],['問題は','もんだいは'],['少し','すこし'],['難しい。','むずかしい。']],
+  [['バスが','ばすが'],['なかなか','なかなか'],['来ない。','こない。']],
+  [['春に','はるに'],['なると','なると'],['桜が','さくらが'],['咲きます。','さきます。']],
+  [['スマホの','すまほの'],['電池が','でんちが'],['切れそうだ。','きれそうだ。']],
+  [['駅で','えきで'],['友達を','ともだちを'],['待っています。','まっています。']],
+  [['机に','つくえに'],['向かって','むかって'],['勉強する。','べんきょうする。']],
+  [['毎週','まいしゅう'],['土曜日に','どようびに'],['テニスを','てにすを'],['します。','します。']],
+  [['道に','みちに'],['迷って','まよって'],['しまった。','しまった。']],
+  [['天気が','てんきが'],['いいので','いいので'],['洗濯をした。','せんたくをした。']],
+  [['かばんに','かばんに'],['お弁当を','おべんとうを'],['入れた。','いれた。']],
+  [['祖母の','そぼの'],['家は','いえは'],['山の','やまの'],['近くです。','ちかくです。']],
+  [['猫が','ねこが'],['ひざの','ひざの'],['上で','うえで'],['寝ている。','ねている。']],
+  [['今年の','ことしの'],['夏は','なつは'],['とても','とても'],['暑かった。','あつかった。']],
+  [['新しい','あたらしい'],['靴を','くつを'],['はいて','はいて'],['出かけた。','でかけた。']],
+  [['料理の','りょうりの'],['作り方を','つくりかたを'],['教えてください。','おしえてください。']],
+  [['夜は','よるは'],['静かに','しずかに'],['本を','ほんを'],['読みたい。','よみたい。']],
+  [['ちょっと','ちょっと'],['休憩しましょう。','きゅうけいしましょう。']],
+  [['手紙の','てがみの'],['返事を','へんじを'],['書いた。','かいた。']],
+  [['駅前で','えきまえで'],['タクシーに','たくしーに'],['乗った。','のった。']],
+  [['電車の','でんしゃの'],['中で','なかで'],['音楽を','おんがくを'],['聴く。','きく。']]
 ];
 const JA_LONG = [
   [['窓を','まどを'],['開けると、','あけると、'],['涼しい','すずしい'],['風が','かぜが'],['入ってきた。','はいってきた。']],
@@ -301,8 +410,70 @@ const JA_LONG = [
   [['夕方に','ゆうがたに'],['なると、','なると、'],['空が','そらが'],['赤く','あかく'],['染まる。','そまる。']],
   [['キーボードを','きーぼーどを'],['見ないで','みないで'],['打てると、','うてると、'],['作業が','さぎょうが'],['楽になる。','らくになる。']],
   [['冬の','ふゆの'],['朝は、','あさは、'],['布団から','ふとんから'],['出るのが','でるのが'],['つらい。','つらい。']],
-  [['新しい','あたらしい'],['ことを','ことを'],['始めるときは、','はじめるときは、'],['少し','すこし'],['緊張する。','きんちょうする。']]
+  [['新しい','あたらしい'],['ことを','ことを'],['始めるときは、','はじめるときは、'],['少し','すこし'],['緊張する。','きんちょうする。']],
+  [['朝早く','あさはやく'],['起きて、','おきて、'],['近くの','ちかくの'],['川沿いを','かわぞいを'],['走った。','はしった。']],
+  [['仕事が','しごとが'],['終わったら、','おわったら、'],['みんなで','みんなで'],['ご飯を','ごはんを'],['食べに行こう。','たべにいこう。']],
+  [['駅に','えきに'],['着いたとき、','ついたとき、'],['ちょうど','ちょうど'],['電車が','でんしゃが'],['出てしまった。','でてしまった。']],
+  [['休みの','やすみの'],['日には、','ひには、'],['家で','いえで'],['ゆっくり','ゆっくり'],['映画を','えいがを'],['見ています。','みています。']],
+  [['分からない','わからない'],['ことが','ことが'],['あれば、','あれば、'],['遠慮なく','えんりょなく'],['聞いてください。','きいてください。']],
+  [['この','この'],['店の','みせの'],['ケーキは、','けーきは、'],['甘すぎなくて','あますぎなくて'],['おいしい。','おいしい。']],
+  [['昨日は','きのうは'],['風が','かぜが'],['強くて、','つよくて、'],['傘が','かさが'],['壊れてしまった。','こわれてしまった。']],
+  [['目覚まし時計が','めざましどけいが'],['鳴らなかったので、','ならなかったので、'],['学校に','がっこうに'],['遅刻した。','ちこくした。']],
+  [['夏休みには、','なつやすみには、'],['家族で','かぞくで'],['海の','うみの'],['近くの','ちかくの'],['宿に','やどに'],['泊まった。','とまった。']],
+  [['図書館は','としょかんは'],['静かなので、','しずかなので、'],['勉強に','べんきょうに'],['集中できる。','しゅうちゅうできる。']],
+  [['山の','やまの'],['上から','うえから'],['見る','みる'],['景色は、','けしきは、'],['本当に','ほんとうに'],['きれいだった。','きれいだった。']],
+  [['料理を','りょうりを'],['作るのは','つくるのは'],['好きだけど、','すきだけど、'],['片づけは','かたづけは'],['苦手です。','にがてです。']],
+  [['友達から','ともだちから'],['手紙が','てがみが'],['届いて、','とどいて、'],['とても','とても'],['うれしかった。','うれしかった。']],
+  [['寒い','さむい'],['日には、','ひには、'],['温かい','あたたかい'],['スープを','すーぷを'],['飲みたくなる。','のみたくなる。']],
+  [['電車が','でんしゃが'],['混んでいたので、','こんでいたので、'],['一本','いっぽん'],['遅らせることにした。','おくらせることにした。']],
+  [['初めて','はじめて'],['会った','あった'],['人とも、','ひととも、'],['すぐに','すぐに'],['仲良くなれた。','なかよくなれた。']],
+  [['桜の','さくらの'],['季節に','きせつに'],['なると、','なると、'],['公園は','こうえんは'],['人で','ひとで'],['いっぱいになる。','いっぱいになる。']],
+  [['疲れた','つかれた'],['ときは、','ときは、'],['無理をしないで','むりをしないで'],['早めに','はやめに'],['休もう。','やすもう。']],
+  [['実験の','じっけんの'],['結果を','けっかを'],['まとめて、','まとめて、'],['先生に','せんせいに'],['報告した。','ほうこくした。']],
+  [['窓から','まどから'],['差し込む','さしこむ'],['光で、','ひかりで、'],['部屋が','へやが'],['明るくなった。','あかるくなった。']],
+  [['駅から','えきから'],['家までは、','いえまでは、'],['歩いて','あるいて'],['十分ほど','じゅっぷんほど'],['かかります。','かかります。']],
+  [['祖父は','そふは'],['毎朝','まいあさ'],['早起きして、','はやおきして、'],['畑の','はたけの'],['世話をしている。','せわをしている。']],
+  [['雨が','あめが'],['やんだら、','やんだら、'],['空に','そらに'],['大きな','おおきな'],['虹が','にじが'],['出ていた。','でていた。']],
+  [['朝ごはんを','あさごはんを'],['しっかり','しっかり'],['食べると、','たべると、'],['一日','いちにち'],['元気に','げんきに'],['過ごせる。','すごせる。']],
+  [['練習を','れんしゅうを'],['続けて','つづけて'],['いるうちに、','いるうちに、'],['手元を','てもとを'],['見なくても','みなくても'],['打てるようになった。','うてるようになった。']],
+  [['新しい','あたらしい'],['町に','まちに'],['引っ越して、','ひっこして、'],['毎日が','まいにちが'],['新鮮です。','しんせんです。']],
+  [['夜遅くまで','よるおそくまで'],['起きていると、','おきていると、'],['次の','つぎの'],['日が','ひが'],['つらくなる。','つらくなる。']],
+  [['このまま','このまま'],['晴れが','はれが'],['続けば、','つづけば、'],['週末は','しゅうまつは'],['キャンプに','きゃんぷに'],['行ける。','いける。']],
+  [['お店の','おみせの'],['人が','ひとが'],['親切で、','しんせつで、'],['また','また'],['来たいと','きたいと'],['思った。','おもった。']],
+  [['大事な','だいじな'],['ことは、','ことは、'],['あきらめずに','あきらめずに'],['続けることです。','つづけることです。']]
 ];
+const JA_PROVERB = [
+  [['急がば','いそがば'],['回れ。','まわれ。']],
+  [['石の','いしの'],['上にも','うえにも'],['三年。','さんねん。']],
+  [['猿も','さるも'],['木から','きから'],['落ちる。','おちる。']],
+  [['塵も','ちりも'],['積もれば','つもれば'],['山となる。','やまとなる。']],
+  [['七転び','ななころび'],['八起き。','やおき。']],
+  [['早起きは','はやおきは'],['三文の','さんもんの'],['徳。','とく。']],
+  [['花より','はなより'],['団子。','だんご。']],
+  [['百聞は','ひゃくぶんは'],['一見に','いっけんに'],['しかず。','しかず。']],
+  [['好きこそ','すきこそ'],['物の','ものの'],['上手なれ。','じょうずなれ。']],
+  [['笑う','わらう'],['門には','かどには'],['福来たる。','ふくきたる。']],
+  [['継続は','けいぞくは'],['力なり。','ちからなり。']],
+  [['失敗は','しっぱいは'],['成功の','せいこうの'],['もと。','もと。']],
+  [['案ずるより','あんずるより'],['産むが','うむが'],['易し。','やすし。']],
+  [['雨降って','あめふって'],['地固まる。','じかたまる。']],
+  [['犬も','いぬも'],['歩けば','あるけば'],['棒に','ぼうに'],['当たる。','あたる。']],
+  [['習うより','ならうより'],['慣れろ。','なれろ。']],
+  [['時は','ときは'],['金なり。','かねなり。']],
+  [['善は','ぜんは'],['急げ。','いそげ。']],
+  [['二兎を','にとを'],['追う者は','おうものは'],['一兎をも','いっとをも'],['得ず。','えず。']],
+  [['出る','でる'],['杭は','くいは'],['打たれる。','うたれる。']],
+  [['急いては','せいては'],['事を','ことを'],['仕損じる。','しそんじる。']],
+  [['備えあれば','そなえあれば'],['憂いなし。','うれいなし。']],
+  [['千里の','せんりの'],['道も','みちも'],['一歩から。','いっぽから。']],
+  [['十人','じゅうにん'],['十色。','といろ。']],
+  [['一石','いっせき'],['二鳥。','にちょう。']],
+  [['聞くは','きくは'],['一時の','いっときの'],['恥。','はじ。']],
+  [['住めば','すめば'],['都。','みやこ。']],
+  [['旅は','たびは'],['道連れ、','みちづれ、'],['世は','よは'],['情け。','なさけ。']],
+  [['果報は','かほうは'],['寝て','ねて'],['待て。','まて。']]
+];
+const JA_ALL = [...JA_SHORT, ...JA_MID, ...JA_LONG, ...JA_PROVERB];
 
 // ===== かな → ローマ字 (よく使う打ち方はどれでも正解) =====
 const KANA = {
@@ -366,13 +537,39 @@ const EN = [
   'Return your fingers to the home position.', 'Wow, that is amazing!',
   'My favorite season is autumn, because the air is cool.', 'Can you help me with this?',
   'I drink coffee every morning.', 'The moon is very bright tonight.',
-  'Take a deep breath and relax.', 'Never give up, keep moving.'
+  'Take a deep breath and relax.', 'Never give up, keep moving.',
+  'She sells sea shells by the sea shore.', 'Please close the door when you leave.',
+  'It is raining, so take an umbrella.', 'I like to read books on the train.',
+  'Where is the nearest station?', 'We had a great time at the beach.',
+  "Don't forget to drink some water.", 'The cat is sleeping on the sofa.',
+  'Thank you for your kind message.', "Let's meet in front of the library.",
+  'What time does the shop open?', 'He plays the guitar every evening.',
+  'The sky turned orange at sunset.', 'Small steps lead to big changes.',
+  'Learning something new is always fun.', 'Could you speak a little more slowly?',
+  "I'll call you back later.", 'This soup is hot, so be careful.',
+  'Birds are singing in the trees.', 'Turn left at the next corner.',
+  'Every day is a new chance.', 'My brother is taller than me.',
+  "Let's take a short break.", 'I forgot my password again!',
+  'Good morning! Did you sleep well?', 'The library is quiet and calm.',
+  "Time flies when you're having fun.", 'Do your best and forget the rest.',
+  'Look at the screen and trust your fingers.', 'The early bird catches the worm.',
+  'A journey of a thousand miles begins with a single step.', 'Rome was not built in a day.',
+  'Actions speak louder than words.', 'Tomorrow will be a better day.',
+  'Please send me the file by Friday.', "I'm on my way to the station now."
 ];
 const NUM = [
   'I wake up at 7 and leave at 8.', 'There are 365 days in a year.', 'It costs 1500 yen.',
   'We walked 12 km in 3 hours.', 'The meeting is on May 10, 2026.', 'Room 204 is on the 2nd floor.',
   'My score was 98 out of 100.', 'The train leaves at 6:45.', 'Is it 50% off? Yes!',
-  'Call me at 090-1234-5678.', 'The answer is (3 + 4) * 2 = 14.'
+  'Call me at 090-1234-5678.', 'The answer is (3 + 4) * 2 = 14.',
+  'I have 2 cats and 1 dog.', 'The store opens at 10:00.', 'The answer is on page 42.',
+  'She ran 5 km in 28 minutes.', 'Add 3 eggs and 200 g of flour.', 'Take bus No. 17 to the park.',
+  'The test starts at 9:30 sharp!', 'We need 4 chairs for 4 people.', 'The ticket was 2,800 yen.',
+  'It is 25 degrees today.', 'I sleep 7 or 8 hours a night.', 'Is 7 * 8 = 56? Yes, it is.',
+  'Turn to page 128, line 6.', 'The year 2000 was a leap year.', 'Save 30% on all shoes!',
+  'Our team won 3 to 1.', 'Email me at info@example.com.', 'Order #58 is ready.',
+  'The box weighs 1.5 kg.', 'Wait 10 seconds, then try again.', 'I paid $12.50 for lunch.',
+  'The total is 4 + 5 + 6 = 15.', 'Lesson 3 of 10 is done!', 'Meet me at gate 3B at 14:20.'
 ];
 const LESSONS = [
   {id:'intro', title:'0 ホームポジション解説', type:'intro'},
@@ -381,8 +578,33 @@ const LESSONS = [
   {id:'ja3',   title:'3 長めの文(日本語・読点)', type:'ja', items:JA_LONG, min:40, max:80},
   {id:'en',    title:'4 英語の文', type:'en', items:EN},
   {id:'num',   title:'5 数字・記号入りの文', type:'en', items:NUM},
+  {id:'kotowaza', title:'6 ことわざ', type:'ja', items:JA_PROVERB, min:36, max:70},
+  {id:'mix',   title:'7 ミックス(日本語・長文)', type:'ja', items:JA_ALL, min:45, max:80},
   {id:'weak',  title:'★ 苦手キーが多い文', type:'weak'}
 ];
+
+// ===== 自動レベルアップ =====
+// 「いまのレベル」で正確率95%以上・目標速度以上を3回(不合格は1回分戻る)ためると次のレベルへ。
+// レベルが上がると、文章が長く・難しくなり、ヒントが減る
+const LEVELS = [
+  {lesson:'ja1', hint:'full',    speed:40},
+  {lesson:'ja1', hint:'nolabel', speed:50},
+  {lesson:'ja2', hint:'nolabel', speed:60},
+  {lesson:'ja2', hint:'onmiss',  speed:70},
+  {lesson:'ja3', hint:'onmiss',  speed:80},
+  {lesson:'ja3', hint:'none',    speed:90},
+  {lesson:'kotowaza', hint:'none', speed:100},
+  {lesson:'en',  hint:'onmiss',  speed:80},
+  {lesson:'en',  hint:'none',    speed:100},
+  {lesson:'num', hint:'onmiss',  speed:80},
+  {lesson:'num', hint:'none',    speed:90},
+  {lesson:'mix', hint:'none',    speed:120},
+  {lesson:'mix', hint:'none',    speed:150},
+  {lesson:'mix', hint:'none',    speed:180},
+  {lesson:'mix', hint:'none',    speed:210}
+];
+const LV_NEED = 3, LV_ACC = 95;
+const HINT_NAME = {full:'ヒント全部', nolabel:'キー文字なし', onmiss:'ヒントはミス時だけ', none:'ヒントなし'};
 
 // ===== 解説ページ =====
 const INTRO = [
@@ -408,7 +630,7 @@ const INTRO = [
 
 // ===== 保存 (ブラウザ内のみ) =====
 const STORE_KEY = 'yubinavi-v3';
-let save = {layout:null, hint:'full', strict:true, lesson:'intro', miss:{}, hits:{}, best:{}};
+let save = {layout:null, hint:'full', strict:true, lesson:'intro', miss:{}, hits:{}, best:{}, auto:true, level:0, lvPass:0};
 try { Object.assign(save, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch(e) {}
 function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e) {} }
 
@@ -420,7 +642,7 @@ let lessonIdx = Math.max(0, LESSONS.findIndex(l => l.id === save.lesson));
 let introPage = 0, introTimer = null;
 let typing = false;
 let startTime = 0, correct = 0, misses = 0, roundMiss = {}, missedCurrent = false;
-let modalOpenAt = 0, timer = null, lastPick = '';
+let modalOpenAt = 0, timer = null, recent = [];
 
 function buildMaps(){
   charMap = {}; keyByCode = {}; centers = {};
@@ -639,8 +861,10 @@ function fitText(){
 
 /// ===== 出題 =====
 function pickSentences(items, minLen, maxLen, lenOf){
-  const pool = items.slice().sort(() => Math.random() - 0.5);
-  if (pool.length > 1 && JSON.stringify(pool[0]) === lastPick) pool.push(pool.shift());
+  // 最近出た文は後回しにして、なるべく同じ文が続かないようにする
+  const shuffled = items.slice().sort(() => Math.random() - 0.5);
+  const fresh = shuffled.filter(s => !recent.includes(JSON.stringify(s)));
+  const pool = [...fresh, ...shuffled.filter(s => recent.includes(JSON.stringify(s)))];
   const out = []; let n = 0;
   for (const s of pool){
     const l = lenOf(s);
@@ -648,7 +872,8 @@ function pickSentences(items, minLen, maxLen, lenOf){
     out.push(s); n += l + 1;
     if (n >= minLen) break;
   }
-  lastPick = JSON.stringify(out[0]);
+  for (const s of out) recent.push(JSON.stringify(s));
+  recent = recent.slice(-Math.min(60, Math.floor(items.length * 0.7)));
   return out;
 }
 const jaRomaji = s => s.map(c => kanaUnits(c[1]).map(u => u.cands[0]).join('')).join('');
@@ -667,7 +892,7 @@ function makeTokens(lesson){
   if (lesson.type === 'ja') return jaTokens(pickSentences(lesson.items, lesson.min, lesson.max, jaLen));
   if (lesson.type === 'weak'){
     const weak = weakChars();
-    const all = [...JA_SHORT, ...JA_MID, ...JA_LONG];
+    const all = JA_ALL;
     const score = s => { const t = jaRomaji(s); return [...t].filter(c => weak.includes(c)).length / t.length; };
     const top = weak.length ? all.slice().sort((a, b) => score(b) - score(a)).slice(0, 8) : JA_MID;
     return jaTokens(pickSentences(top, 40, 75, jaLen));
@@ -900,6 +1125,11 @@ function finish(){
     $('resTitle').textContent = acc >= 95 ? 'おつかれさま! 正確です' : acc >= 85 ? 'おつかれさま!' : 'ゆっくりで大丈夫。正確さ重視でいきましょう';
     $('againBtn').firstChild.textContent = '次の文章 ';
   }
+  const lv = lesson.type === 'intro' ? null : judgeLevel(speed, acc);
+  $('resLevel').innerHTML = lv ? lv.html : '';
+  $('resLevel').className = 'lvres' + (lv && lv.up ? ' up' : '');
+  if (lv && lv.up) $('resTitle').textContent = 'レベルアップ!';
+  persist(); renderLevelTag();
   $('modal').classList.add('show'); modalOpenAt = performance.now();
 }
 function modalKey(e){
@@ -912,6 +1142,65 @@ function closeModal(){ $('modal').classList.remove('show'); }
 function again(){ closeModal(); newRound(); }
 function nextLesson(){ closeModal(); selectLesson((lessonIdx + 1) % LESSONS.length); }
 
+// ===== レベル =====
+const lessonTitle = id => LESSONS.find(l => l.id === id).title.replace(/^\S+\s/, '');
+const levelName = i => `Lv${i + 1} ${lessonTitle(LEVELS[i].lesson)}・${HINT_NAME[LEVELS[i].hint]}`;
+// いまの設定がレベルどおりか (違うレッスン・ヒントを自分で選んだら判定しない)
+function onLevel(){
+  const L = LEVELS[save.level];
+  return save.auto && L && LESSONS[lessonIdx].id === L.lesson && save.hint === L.hint;
+}
+// 自分でレッスン・ヒントを変えたとき: 合うレベルがあればそこから続ける
+function syncLevel(pickHint){
+  if (!save.auto || onLevel()) return;
+  const id = LESSONS[lessonIdx].id;
+  let j = LEVELS.findIndex(L => L.lesson === id && L.hint === save.hint);
+  if (j < 0 && pickHint) j = LEVELS.findIndex(L => L.lesson === id);
+  if (j < 0) return;
+  save.level = j; save.lvPass = 0;
+  if (save.hint !== LEVELS[j].hint){ save.hint = LEVELS[j].hint; $('hintSel').value = save.hint; }
+}
+function goLevel(i){
+  const L = LEVELS[i];
+  save.level = i; save.lvPass = 0; save.hint = L.hint; $('hintSel').value = L.hint;
+  lessonIdx = LESSONS.findIndex(l => l.id === L.lesson); save.lesson = L.lesson;
+  persist(); renderLessonSel(); applyHint();
+}
+// 1回打ち終わるごとの判定。結果画面に出す文を返す
+function judgeLevel(speed, acc){
+  if (!onLevel()) return null;
+  const L = LEVELS[save.level];
+  const ok = acc >= LV_ACC && speed >= L.speed;
+  save.lvPass = ok ? save.lvPass + 1 : Math.max(0, save.lvPass - 1);
+  if (save.lvPass >= LV_NEED){
+    if (save.level < LEVELS.length - 1){
+      const from = save.level;
+      goLevel(from + 1);
+      const nx = LEVELS[from + 1], hintDown = nx.hint !== L.hint, lessonUp = nx.lesson !== L.lesson;
+      return {up:true, html:`レベルアップ! <b>${levelName(from + 1)}</b><br><span class="kbd">` +
+        (lessonUp ? '文章が変わります。' : '') + (hintDown ? 'ヒントが減ります。' : '') +
+        `目標 ${nx.speed} 打/分(戻すときはレッスン・ヒントを選び直す)</span>`};
+    }
+    save.lvPass = LV_NEED;
+    return {up:true, html:`最高レベル ${levelName(save.level)} クリア! 本物のブラインドタッチです`};
+  }
+  const need = [];
+  if (acc < LV_ACC) need.push(`正確率 ${LV_ACC}%`);
+  if (speed < L.speed) need.push(`速度 ${L.speed} 打/分`);
+  return {up:false, html: ok
+    ? `合格! レベルアップまで あと ${LV_NEED - save.lvPass} 回`
+    : `レベルアップ判定: ${need.join('・')} 以上で合格(いま ${save.lvPass}/${LV_NEED})`};
+}
+function renderLevelTag(){
+  const t = $('lvTag');
+  if (!save.auto){ t.textContent = ''; return; }
+  if (!onLevel()){ t.className = 'lvtag off'; t.textContent = '自由練習(レベル判定なし)'; t.title = ''; return; }
+  const L = LEVELS[save.level];
+  t.className = 'lvtag';
+  t.innerHTML = `Lv${save.level + 1}<span class="dots">${'●'.repeat(save.lvPass)}${'○'.repeat(LV_NEED - save.lvPass)}</span>`;
+  t.title = `${levelName(save.level)}\n正確率${LV_ACC}%以上・${L.speed}打/分以上を${LV_NEED}回でレベルアップ`;
+}
+
 // ===== レッスン・設定 =====
 function renderLessonSel(){
   $('lessonSel').innerHTML = LESSONS.map((l, i) =>
@@ -920,7 +1209,8 @@ function renderLessonSel(){
 function selectLesson(i){
   lessonIdx = i; save.lesson = LESSONS[i].id; persist();
   if (LESSONS[i].type === 'intro') introPage = 0;
-  renderLessonSel(); applyHint(); newRound();
+  syncLevel(true); persist();
+  renderLessonSel(); applyHint(); renderLevelTag(); newRound();
 }
 function setLayout(l, chosen){
   layout = l; $('layoutSel').value = l;
@@ -939,7 +1229,9 @@ function applyHint(){
 $('lessonSel').onchange = e => { selectLesson(+e.target.value); e.target.blur(); };
 $('layoutSel').onchange = e => { setLayout(e.target.value, true); e.target.blur(); };
 $('hintSel').value = save.hint;
-$('hintSel').onchange = e => { save.hint = e.target.value; persist(); applyHint(); if (typing) update(); e.target.blur(); };
+$('hintSel').onchange = e => { save.hint = e.target.value; syncLevel(false); persist(); applyHint(); renderLevelTag(); if (typing) update(); e.target.blur(); };
+$('autoChk').checked = save.auto;
+$('autoChk').onchange = e => { save.auto = e.target.checked; syncLevel(true); persist(); applyHint(); renderLevelTag(); if (typing) update(); e.target.blur(); };
 $('strictChk').checked = save.strict;
 $('strictChk').onchange = e => { save.strict = e.target.checked; persist(); e.target.blur(); };
 $('restartBtn').onclick = e => { e.target.blur(); newRound(); };
@@ -957,7 +1249,8 @@ if (!save.layout && navigator.keyboard && navigator.keyboard.getLayoutMap){
   }).catch(() => {});
 }
 
-buildMaps(); renderKeyboard(); renderHands(); renderLessonSel(); applyHint();
+syncLevel(false);
+buildMaps(); renderKeyboard(); renderHands(); renderLessonSel(); applyHint(); renderLevelTag();
 fitLayout(); newRound(); fitLayout();
 </script>
 </body>
