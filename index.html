@@ -11,6 +11,7 @@
   --accent:#2f6fed; --accent-soft:#dfe8fd; --bad:#e5484d; --bad-soft:#fde4e4; --good:#2a9d63;
   --key:#fbfaf7; --hand:#f3e7da;
   --f-p:#cdbaf5; --f-r:#a9cdf5; --f-m:#aee3c0; --f-i:#ffd59a; --f-t:#dcd8cf;
+  --u:40px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -27,32 +28,31 @@
   --f-p:#56478a; --f-r:#2d5884; --f-m:#2e6a48; --f-i:#86602a; --f-t:#3c3f45;
 }
 *{box-sizing:border-box}
+html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;line-height:1.5}
-.wrap{max-width:1000px;margin:0 auto;padding:16px}
-header{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between;margin-bottom:12px}
-h1{font-size:22px;margin:0;letter-spacing:.02em}
-h1 small{font-size:13px;color:var(--muted);font-weight:normal;margin-left:8px}
-.settings{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;align-items:center}
+.wrap{max-width:1000px;margin:0 auto;padding:10px 16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;justify-content:space-between;margin-bottom:8px}
+h1{font-size:19px;margin:0;white-space:nowrap}
+.settings{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:13px;align-items:center}
 .settings label{display:flex;align-items:center;gap:4px;color:var(--muted)}
-select,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+select,button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px 8px}
 button{cursor:pointer}
 button:hover{border-color:var(--accent)}
-.lessons{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.lessons button{padding:6px 10px;font-size:13px}
-.lessons button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.lessons .best{font-size:11px;opacity:.75;margin-left:4px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-.guide{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-height:44px;font-size:18px;margin-bottom:8px}
-.chip{display:inline-block;padding:2px 12px;border-radius:999px;background:var(--fc,var(--key));border:1px solid var(--line);font-weight:bold}
-.keycap{display:inline-block;min-width:36px;text-align:center;padding:2px 8px;border-radius:8px;border:2px solid var(--accent);font-weight:bold;font-family:ui-monospace,Consolas,monospace;font-size:20px}
-.guide .plus{color:var(--muted);font-size:15px}
-.msg{min-height:22px;font-size:14px;color:var(--bad)}
-.msg.info{color:var(--muted)}
-.text{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:28px;line-height:1.25;
-  padding:8px 4px 12px;word-break:normal;min-height:100px}
-.tok{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:bottom;margin-bottom:8px}
-.kana{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;font-size:14px;color:var(--muted);padding-left:2px}
+.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.guide{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;height:40px;font-size:17px;overflow:hidden;white-space:nowrap}
+.guide .grow{flex:1}
+.guide h2{font-size:18px;margin:0}
+.chip{display:inline-block;padding:1px 12px;border-radius:999px;background:var(--fc,var(--key));border:1px solid var(--line);font-weight:bold}
+.keycap{display:inline-block;min-width:34px;text-align:center;padding:0 8px;border-radius:8px;border:2px solid var(--accent);font-weight:bold;font-family:ui-monospace,Consolas,monospace;font-size:19px}
+.plus{color:var(--muted);font-size:14px}
+.textbox{position:relative;height:128px;overflow:hidden;margin:4px 0}
+.text{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:30px;line-height:1.3;padding:4px 2px}
+.intro{font-size:16px;line-height:1.7;padding:2px}
+.intro ul{margin:0;padding-left:1.3em}
+.tok{display:inline-flex;flex-direction:column;align-items:flex-start;vertical-align:bottom;margin-bottom:6px}
+.kana{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;font-size:.5em;color:var(--muted);padding-left:2px;white-space:nowrap}
 .ch{display:inline-block;border-radius:4px;padding:0 1px;border-bottom:3px solid transparent}
 .ch.sp{color:var(--line)}
 .ch.done{color:var(--muted)}
@@ -61,20 +61,23 @@ button:hover{border-color:var(--accent)}
 .ch.cur.err{background:var(--bad-soft);border-bottom-color:var(--bad)}
 .text.shake{animation:shake .18s}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-.live{display:flex;gap:18px;font-size:13px;color:var(--muted);align-items:center;flex-wrap:wrap}
-.live b{color:var(--ink);font-size:16px}
-.bar{flex:1;min-width:120px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s}
-.ime{display:none;margin:8px 0;padding:8px 12px;border-radius:8px;background:var(--bad-soft);color:var(--ink);font-size:14px}
+.ime{display:none;position:absolute;inset:auto 0 0 0;padding:6px 12px;border-radius:8px;background:var(--bad-soft);font-size:14px}
 .ime.show{display:block}
+.msg{height:22px;font-size:14px;color:var(--bad);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg.info{color:var(--muted)}
+.live{display:flex;gap:16px;font-size:13px;color:var(--muted);align-items:center;height:30px}
+.live b{color:var(--ink);font-size:15px}
+.bar{flex:1;min-width:60px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s}
 
 /* keyboard */
-.kbwrap{margin-top:12px;overflow:hidden}
-.kb{--u:clamp(22px, calc((100vw - 64px) / 15), 58px);width:calc(var(--u) * 15);margin:0 auto;user-select:none}
+.kbarea{display:flex;flex-direction:column;align-items:center;margin-top:6px}
+.kbarea.side{flex-direction:row;justify-content:center;gap:calc(var(--u) * .5)}
+.kb{width:calc(var(--u) * 15);margin:0 auto;user-select:none}
 .kb-row{display:flex}
 .key{position:relative;width:calc(var(--u) * var(--w) - 4px);height:calc(var(--u) - 4px);margin:2px;border-radius:7px;
   background:var(--fc,var(--key));border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
-  flex-direction:column;font-size:calc(var(--u) * .36);font-family:ui-monospace,Consolas,monospace;transition:transform .08s}
+  flex-direction:column;font-size:calc(var(--u) * .36);font-family:ui-monospace,Consolas,monospace;transition:transform .08s,opacity .15s}
 .key .top{font-size:.62em;opacity:.7;line-height:1}
 .key .bot{line-height:1.1}
 .key.mod{font-size:calc(var(--u) * .22);font-family:inherit;color:var(--muted)}
@@ -83,6 +86,8 @@ button:hover{border-color:var(--accent)}
 .kb.nolabel .key .lbl{visibility:hidden}
 .key.target{outline:3px solid var(--accent);outline-offset:1px;transform:translateY(-2px);z-index:2;animation:pulse 1s infinite}
 .key.target2{outline:3px dashed var(--accent);outline-offset:1px;z-index:2}
+.key.hl{outline:3px solid var(--accent);outline-offset:1px;z-index:2}
+.kb.dim .key:not(.hl){opacity:.35}
 @keyframes pulse{50%{outline-color:transparent}}
 .key.hit-ok{background:var(--good);color:#fff}
 .key.hit-ng{background:var(--bad);color:#fff}
@@ -90,7 +95,7 @@ button:hover{border-color:var(--accent)}
 [data-f$="m"]{--fc:var(--f-m)} [data-f$="i"]{--fc:var(--f-i)} [data-f="th"]{--fc:var(--f-t)}
 
 /* hands */
-.hands{display:block;width:100%;max-width:560px;margin:8px auto 0}
+.hands{display:block;height:calc(var(--u) * var(--hh, 2.6));width:calc(var(--u) * var(--hh, 2.6) * 600 / 245);margin-top:4px;flex:none}
 .hands .palm{fill:var(--hand);stroke:var(--line);stroke-width:2}
 .hands .finger rect{fill:var(--fc);stroke:var(--line);stroke-width:2;opacity:.6;transition:all .1s}
 .hands .finger text{font:bold 15px ui-monospace,Consolas,monospace;fill:var(--ink);text-anchor:middle;opacity:.75}
@@ -98,11 +103,7 @@ button:hover{border-color:var(--accent)}
 .hands .finger.on text{opacity:1}
 .hands .finger.on2 rect{opacity:1;stroke:var(--accent);stroke-width:3;stroke-dasharray:6 4}
 .hands .side{font-size:14px;fill:var(--muted);text-anchor:middle}
-.hidden{display:none!important}
-
-.tips{margin-top:14px;font-size:13px;color:var(--muted)}
-.tips summary{cursor:pointer;color:var(--ink)}
-.tips li{margin:2px 0}
+.hidden{visibility:hidden}
 
 /* result */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -115,54 +116,46 @@ button:hover{border-color:var(--accent)}
 .weak{font-size:14px;margin:8px 0;min-height:20px}
 .btns{display:flex;gap:8px;justify-content:center;margin-top:10px}
 .btns button{padding:8px 14px}
-.btns .primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 .kbd{font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>指ナビ タイピング<small>次のキーと「どの指で押すか」を表示します</small></h1>
-    <div class="settings">
-      <label>配列 <select id="layoutSel"><option value="jis">日本語(JIS)</option><option value="us">英語(US)</option></select></label>
-      <label>ヒント <select id="hintSel">
-        <option value="full">全部表示</option>
-        <option value="nolabel">キーの文字を隠す</option>
-        <option value="onmiss">ミスした時だけ</option>
-        <option value="none">なし(本番)</option>
-      </select></label>
-      <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
+  <div id="top">
+    <header>
+      <h1>指ナビ タイピング</h1>
+      <div class="settings">
+        <label>レッスン <select id="lessonSel"></select></label>
+        <label>配列 <select id="layoutSel"><option value="jis">日本語(JIS)</option><option value="us">英語(US)</option></select></label>
+        <label>ヒント <select id="hintSel">
+          <option value="full">全部表示</option>
+          <option value="nolabel">キーの文字を隠す</option>
+          <option value="onmiss">ミスした時だけ</option>
+          <option value="none">なし(本番)</option>
+        </select></label>
+        <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
+      </div>
+    </header>
+    <div class="card" id="card">
+      <div class="guide" id="guide"></div>
+      <div class="textbox" id="textbox">
+        <div class="text" id="text"></div>
+        <div class="ime" id="ime">日本語入力がオンです。<b>半角/全角</b>キーで英数入力にしてください。</div>
+      </div>
+      <div class="msg info" id="msg"></div>
+      <div class="live" id="live">
+        <span>速度 <b id="lvSpeed">0</b> 打/分</span>
+        <span>正確率 <b id="lvAcc">100</b>%</span>
+        <span>ミス <b id="lvMiss">0</b></span>
+        <div class="bar"><i id="lvBar"></i></div>
+        <button id="restartBtn">やり直す (Esc)</button>
+      </div>
     </div>
-  </header>
-
-  <nav class="lessons" id="lessons"></nav>
-
-  <div class="card">
-    <div class="guide" id="guide"></div>
-    <div class="ime" id="ime">日本語入力がオンになっています。<b>半角/全角</b>キーを押して英数入力にしてください。</div>
-    <div class="text" id="text"></div>
-    <div class="msg info" id="msg">F と J の突起に人差し指をのせて、ホームポジションから始めましょう。手元は見ずに画面を見て打ちます。</div>
-    <div class="live">
-      <span>速度 <b id="lvSpeed">0</b> 打/分</span>
-      <span>正確率 <b id="lvAcc">100</b>%</span>
-      <span>ミス <b id="lvMiss">0</b></span>
-      <div class="bar"><i id="lvBar"></i></div>
-      <button id="restartBtn" title="Esc">やり直す (Esc)</button>
-    </div>
-    <div class="kbwrap"><div class="kb" id="kb"></div></div>
+  </div>
+  <div class="kbarea" id="kbarea">
+    <div class="kbwrap" id="kbwrap"><div class="kb" id="kb"></div></div>
     <svg class="hands" id="hands" viewBox="0 0 600 245" aria-label="指の図"></svg>
   </div>
-
-  <details class="tips">
-    <summary>上達のコツ</summary>
-    <ul>
-      <li>指は打ったらすぐホームポジション(A S D F / J K L ;)に戻す。F と J の突起で手元を見ずに位置がわかります。</li>
-      <li>最初は速さより正確さ。正確率95%以上を保てるようになってから速くしましょう。</li>
-      <li>大文字や記号は、押すキーと<b>反対の手の小指</b>で Shift を押します。</li>
-      <li>慣れてきたら「ヒント」を「キーの文字を隠す」→「ミスした時だけ」→「なし」と段階的に減らすと、本当に見ずに打てるようになります。</li>
-      <li>目安: 100打/分=ふつう、200打/分=速い、300打/分以上=上級。</li>
-    </ul>
-  </details>
 </div>
 
 <div class="modal" id="modal">
@@ -176,8 +169,8 @@ button:hover{border-color:var(--accent)}
     <div class="weak" id="resWeak"></div>
     <div class="kbd" id="resBest"></div>
     <div class="btns">
-      <button class="primary" id="againBtn">もう一回 <span class="kbd" style="color:inherit">Space</span></button>
-      <button id="nextBtn">次のレッスン <span class="kbd">Enter</span></button>
+      <button class="primary" id="againBtn">次の文章 <span class="kbd" style="color:inherit">Space</span></button>
+      <button id="nextBtn">次のレッスンへ <span class="kbd">Enter</span></button>
     </div>
   </div>
 </div>
@@ -188,7 +181,6 @@ const FINGERS = {
   lp:'左手・小指', lr:'左手・薬指', lm:'左手・中指', li:'左手・人差し指', th:'親指',
   ri:'右手・人差し指', rm:'右手・中指', rr:'右手・薬指', rp:'右手・小指'
 };
-// キー定義: code は KeyboardEvent.code と同じ
 function K(code, base, shift, f, w = 1, label){ return {code, base, shift, f, w, label}; }
 const L = (c, f) => K('Key' + c.toUpperCase(), c, c.toUpperCase(), f);
 const D = (n, s, f) => K('Digit' + n, n, s, f);
@@ -209,7 +201,7 @@ const LAYOUTS = {
      L('n','ri'), L('m','ri'), K('Comma',',','<','rm'), K('Period','.','>','rr'), K('Slash','/','?','rp'),
      K('IntlRo','\\','_','rp',1,'\\'), M('ShiftRight','Shift',1.75,'rp')],
     [M('ControlLeft','Ctrl',1.5), M('MetaLeft','Win',1.25), M('AltLeft','Alt',1.25), M('NonConvert','無変換',1.25),
-     K('Space',' ',null,'th',4.5,''), M('Convert','変換',1.25), M('KanaMode','かな',1.25), M('AltRight','Alt',1.25), M('ControlRight','Ctrl',1.5)]
+     K('Space',' ',null,'th',4.5,'スペース'), M('Convert','変換',1.25), M('KanaMode','かな',1.25), M('AltRight','Alt',1.25), M('ControlRight','Ctrl',1.5)]
   ],
   us: [
     [K('Backquote','`','~','lp'), D('1','!','lp'), D('2','@','lr'), D('3','#','lm'), D('4','$','li'), D('5','%','li'),
@@ -225,49 +217,94 @@ const LAYOUTS = {
      L('n','ri'), L('m','ri'), K('Comma',',','<','rm'), K('Period','.','>','rr'), K('Slash','/','?','rp'),
      M('ShiftRight','Shift',2.75,'rp')],
     [M('ControlLeft','Ctrl',1.5), M('MetaLeft','Win',1.25), M('AltLeft','Alt',1.25),
-     K('Space',' ',null,'th',7,''), M('AltRight','Alt',1.25), M('Fn','Fn',1.25), M('ControlRight','Ctrl',1.5)]
+     K('Space',' ',null,'th',7,'スペース'), M('AltRight','Alt',1.25), M('Fn','Fn',1.25), M('ControlRight','Ctrl',1.5)]
   ]
 };
 
-// ===== 練習データ =====
-const WORDS = 'the and you that was for are with his they this have from one had word but not what all were when your can said there use each which she how their will other about out many then them these some her would make like him into time has look two more write see number way could people than first water been call who now find long down day did get come made may part apple music light sound paper river house green happy quick jump zero quiz box very keyboard finger practice school friend world night table window orange yellow'.split(' ');
-const SENTENCES = [
-  'The quick brown fox jumps over the lazy dog.',
-  'Practice makes perfect.',
-  'Keep your eyes on the screen, not on your hands.',
-  'I like to listen to music in the evening.',
-  'Typing without looking is a skill you can learn.',
-  'Jackdaws love my big sphinx of quartz.',
-  'She sells sea shells by the sea shore.',
-  'Return your fingers to the home position.',
-  'My favorite season is autumn, because the air is cool.',
-  'Slow and steady wins the race.'
+// ===== 文章データ =====
+// 各レッスンは、そこまでに習ったキーだけで書ける文章
+const S_HOME = [
+  'a sad lad asks dad', 'dad adds a salad', 'a lass falls; dad asks', 'all lads ask dad',
+  'a flask falls; a lass asks', 'dad asks a lad; all fall', 'a lad adds salads; dad asks'
 ];
-const ROMAJI = [
-  ['さくら','sakura'],['ねこ','neko'],['いぬ','inu'],['やま','yama'],['かわ','kawa'],['そら','sora'],['はな','hana'],
-  ['みず','mizu'],['うみ','umi'],['ともだち','tomodachi'],['せんせい','sensei'],['がっこう','gakkou'],['ひこうき','hikouki'],
-  ['じてんしゃ','jitensha'],['でんしゃ','densha'],['たまご','tamago'],['りんご','ringo'],['きもの','kimono'],['でんき','denki'],
-  ['おちゃ','ocha'],['きっぷ','kippu'],['しゅくだい','shukudai'],['べんきょう','benkyou'],['とうきょう','toukyou'],
-  ['ありがとう','arigatou'],['おはよう','ohayou'],['すし','sushi'],['てんぷら','tenpura'],['かいしゃ','kaisha'],
-  ['けいたい','keitai'],['つくえ','tsukue'],['ふゆ','fuyu'],['なつ','natsu'],['はる','haru'],['よる','yoru'],
-  ['ひかり','hikari'],['おんがく','ongaku'],['ちきゅう','chikyuu'],['れんしゅう','renshuu'],['きーぼーど','ki-bo-do'],
-  ['こーひー','ko-hi-'],['けーき','ke-ki'],['じっけん','jikken'],['けんきゅう','kenkyuu'],['ゆびさき','yubisaki']
+const S_GH = [
+  'a glad lass has a flask', 'dad had a hash salad', 'a lass has a glass', 'shall dad ask a lass',
+  'dad has half a flask', 'a lad has a glass; dad has a flask', 'a glad dad shall ask'
+];
+const S_TOP = [
+  'the tree is tall', 'you are here', 'drop the red pear', 'it is our first day',
+  'the sky is so dark outside', 'she wrote a short story', 'keep a quiet pose',
+  'the old lady has a pretty pet', 'dad poured hot tea', 'try it after the party', 'we sat outside all day'
+];
+const S_ALL = [
+  'my mom bought a new bike.', 'the cat jumped over the box.', 'never give up, keep moving.',
+  'we can do it, step by step.', 'zebras live in a big zoo.', 'a quick brown fox jumps over the lazy dog.',
+  'i drink coffee every morning.', 'the moon is very bright tonight.', 'music makes me calm.',
+  'take a deep breath and relax.'
+];
+const S_EN = [
+  'The quick brown fox jumps over the lazy dog.', 'Practice makes perfect.',
+  'Keep your eyes on the screen, not on your hands.', 'How are you today?',
+  'Typing without looking is a skill you can learn.', 'Slow and steady wins the race.',
+  'Return your fingers to the home position.', 'Wow, that is amazing!',
+  'My favorite season is autumn, because the air is cool.', 'Can you help me with this?'
+];
+const S_NUM = [
+  'I wake up at 7 and leave at 8.', 'There are 365 days in a year.', 'It costs 1500 yen.',
+  'We walked 12 km in 3 hours.', 'The meeting is on May 10, 2026.', 'Room 204 is on the 2nd floor.',
+  'My score was 98 out of 100.', 'The train leaves at 6:45.'
+];
+// 日本語: [表示, ローマ字] の文節ごと
+const S_JA = [
+  [['今日は','kyouha'],['いい','ii'],['天気ですね。','tenkidesune.']],
+  [['私は','watashiha'],['大学生です。','daigakuseidesu.']],
+  [['毎朝','maiasa'],['コーヒーを','ko-hi-wo'],['飲みます。','nomimasu.']],
+  [['駅まで','ekimade'],['歩いて','aruite'],['行きます。','ikimasu.']],
+  [['週末は','shuumatsuha'],['友達と','tomodachito'],['映画を','eigawo'],['見ました。','mimashita.']],
+  [['研究室で','kenkyuushitsude'],['実験を','jikkenwo'],['しています。','shiteimasu.']],
+  [['明日は','ashitaha'],['雨が','amega'],['降るそうです。','furusoudesu.']],
+  [['ゆっくり','yukkuri'],['正確に','seikakuni'],['打ちましょう。','uchimashou.']],
+  [['窓を','madowo'],['開けると','akeruto'],['風が','kazega'],['気持ちいい。','kimochiii.']],
+  [['ありがとう','arigatou'],['ございました。','gozaimashita.']],
+  [['手元を','temotowo'],['見ないで','minaide'],['打てるように','uteruyouni'],['なりたい。','naritai.']]
 ];
 const LESSONS = [
-  {id:'home',  title:'1 ホーム段',    type:'keys', pool:'asdfjkl;', focus:'asdfjkl;'},
-  {id:'gh',    title:'2 G と H',      type:'keys', pool:'asdfghjkl;', focus:'gh'},
-  {id:'top',   title:'3 上段',        type:'keys', pool:'asdfghjkl;qwertyuiop', focus:'qwertyuiop'},
-  {id:'bottom',title:'4 下段',        type:'keys', pool:'asdfghjkl;qwertyuiopzxcvbnm,.', focus:'zxcvbnm,.'},
-  {id:'words', title:'5 英単語',      type:'words'},
-  {id:'romaji',title:'6 ローマ字',    type:'romaji'},
-  {id:'num',   title:'7 数字',        type:'keys', pool:'1234567890', focus:'1234567890'},
-  {id:'sent',  title:'8 英文(大文字・記号)', type:'sentences'},
-  {id:'weak',  title:'★ 苦手キー',    type:'weak'}
+  {id:'intro', title:'0 ホームポジション解説', type:'intro'},
+  {id:'home',  title:'1 ホーム段 (ASDF JKL;)', type:'en', items:S_HOME},
+  {id:'gh',    title:'2 ＋G H', type:'en', items:S_GH},
+  {id:'top',   title:'3 ＋上段', type:'en', items:S_TOP},
+  {id:'all',   title:'4 ＋下段 (全部の文字)', type:'en', items:S_ALL},
+  {id:'en',    title:'5 英文 (大文字・記号)', type:'en', items:S_EN},
+  {id:'ja',    title:'6 日本語の文 (ローマ字)', type:'ja', items:S_JA},
+  {id:'num',   title:'7 数字入りの文', type:'en', items:S_NUM},
+  {id:'weak',  title:'★ 苦手キーが多い文', type:'weak'}
+];
+
+// ===== 解説ページ =====
+const HOME_CODES = ['KeyA','KeyS','KeyD','KeyF','KeyJ','KeyK','KeyL','Semicolon','Space'];
+const INTRO = [
+  {title:'① ホームポジション', html:
+    'キーボードの <b>F</b> と <b>J</b> には小さな<b>突起</b>があります(下の図の線)。ここに左右の<b>人差し指</b>をのせ、残りの指を横に並べます。<br>' +
+    '左手 <b>A S D F</b> ／ 右手 <b>J K L ;</b> ／ 親指は<b>スペース</b>の上。<br>' +
+    '指は軽く丸め、手首は机から少し浮かせます。打っていないときは、いつもこの位置に指を置きます。',
+    hl:() => ({codes:HOME_CODES, fingers:Object.keys(FINGERS)})},
+  {title:'② 指の担当', html:
+    '<b>キーの色と、指の色が同じ</b>です。各指はホームから<b>真上・真下</b>(少し左に斜め)へ動きます。<br>' +
+    '人差し指だけは2列ずつ担当します(左 F G R T V B ／ 右 J H U Y N M)。<br>' +
+    '下のキーボードで、指ごとの担当キーを順番に光らせています。',
+    cycle:true},
+  {title:'③ 打ち方のルール', html:
+    '<ul><li>打ったら、すぐ<b>ホームポジションに戻る</b></li>' +
+    '<li>スペースは<b>親指</b>。大文字・記号は、押すキーと<b>反対の手の小指</b>で Shift</li>' +
+    '<li><b>手元は見ない</b>。わからなくなったら画面の手の図を見る。F と J の突起で位置を確かめる</li>' +
+    '<li><b>速さより正確さ</b>。正確率95%以上を保てたら、少しずつ速くする</li></ul>',
+    hl:() => ({codes:['ShiftLeft','ShiftRight','Space','KeyF','KeyJ'], fingers:['lp','rp','th','li','ri']})},
+  {title:'④ 置いてみよう', practice:'fj fj asdf jkl; asdf jkl;'}
 ];
 
 // ===== 保存 (ブラウザ内のみ) =====
-const STORE_KEY = 'yubinavi-v1';
-let save = {layout:null, hint:'full', strict:true, lesson:'home', miss:{}, hits:{}, best:{}};
+const STORE_KEY = 'yubinavi-v2';
+let save = {layout:null, hint:'full', strict:true, lesson:'intro', miss:{}, hits:{}, best:{}};
 try { Object.assign(save, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch(e) {}
 function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e) {} }
 
@@ -276,9 +313,10 @@ const $ = id => document.getElementById(id);
 let layout = save.layout || 'jis';
 let charMap = {}, keyByCode = {};
 let lessonIdx = Math.max(0, LESSONS.findIndex(l => l.id === save.lesson));
-let target = '', chars = [], pos = 0;
-let startTime = 0, correct = 0, misses = 0, roundMiss = {}, missedCurrent = false, errAt = new Set();
-let modalOpenAt = 0, timer = null;
+let introPage = 0, introTimer = null;
+let target = '', chars = [], pos = 0, typing = false;
+let startTime = 0, correct = 0, misses = 0, roundMiss = {}, missedCurrent = false;
+let modalOpenAt = 0, timer = null, lastPick = '';
 
 function buildMaps(){
   charMap = {}; keyByCode = {};
@@ -288,8 +326,9 @@ function buildMaps(){
     if (k.shift && !(k.shift in charMap)) charMap[k.shift] = {k, shift:true};
   }
 }
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-// ===== キーボード描画 =====
+// ===== キーボード・手の図 =====
 function renderKeyboard(){
   const kb = $('kb'); kb.innerHTML = '';
   for (const row of LAYOUTS[layout]){
@@ -298,13 +337,11 @@ function renderKeyboard(){
       const d = document.createElement('div');
       d.className = 'key'; d.dataset.code = k.code; d.style.setProperty('--w', k.w);
       if (k.f) d.dataset.f = k.f; else d.classList.add('nofinger');
-      const isLetter = k.base && /^[a-z]$/.test(k.base);
       if (k.base == null || k.code === 'Space'){
-        d.classList.add('mod'); d.innerHTML = `<span class="lbl">${k.label ?? ''}</span>`;
-      } else if (isLetter){
+        d.classList.add('mod'); d.innerHTML = `<span class="lbl">${esc(k.label)}</span>`;
+      } else if (/^[a-z]$/.test(k.base)){
         d.innerHTML = `<span class="lbl">${k.base.toUpperCase()}</span>`;
       } else {
-        const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
         d.innerHTML = `<span class="lbl top">${esc(k.shift)}</span><span class="lbl bot">${esc(k.label ?? k.base)}</span>`;
       }
       if (k.code === 'KeyF' || k.code === 'KeyJ') d.classList.add('bump');
@@ -314,8 +351,6 @@ function renderKeyboard(){
     kb.appendChild(r);
   }
 }
-
-// ===== 手の図 =====
 function renderHands(){
   const W = 600;
   const LEFT = [
@@ -328,9 +363,9 @@ function renderHands(){
   let s = '';
   for (const side of ['L','R']){
     const mx = (x, w) => side === 'L' ? x : W - x - w;
-    // 親指
-    const tx = mx(196, 34), rot = side === 'L' ? 38 : -38, cx = side === 'L' ? 213 : W - 213;
-    s += `<g class="finger" data-f="th" data-side="${side}"><rect x="${tx}" y="112" width="34" height="96" rx="17" transform="rotate(${rot} ${cx} 205)"/></g>`;
+    // 親指: 手のひらの内側から、スペースキーの方(下・内側)へ伸びる
+    const tx = mx(176, 36), rot = side === 'L' ? -40 : 40, cx = side === 'L' ? 194 : W - 194;
+    s += `<g class="finger" data-f="th"><rect x="${tx}" y="128" width="36" height="96" rx="18" transform="rotate(${rot} ${cx} 146)"/></g>`;
     for (const g of LEFT){
       const f = side === 'L' ? g.f : 'r' + g.f[1];
       const key = side === 'L' ? g.key : RKEY[g.f];
@@ -343,111 +378,167 @@ function renderHands(){
   }
   $('hands').innerHTML = s;
 }
-
-// ===== 問題作成 =====
-const rnd = n => Math.floor(Math.random() * n);
-const pick = a => a[rnd(a.length)];
-function weakChars(pool){
-  const list = Object.keys(save.miss).filter(c => /^[a-z0-9;,.\-]$/.test(c) && (!pool || pool.includes(c)))
-    .map(c => ({c, r: save.miss[c] / ((save.hits[c] || 0) + save.miss[c])}))
-    .filter(o => save.miss[o.c] >= 2).sort((a,b) => b.r - a.r);
-  return list.slice(0, 8).map(o => o.c);
+function clearMarks(){
+  document.querySelectorAll('.key.target,.key.target2,.key.hl').forEach(k => k.classList.remove('target','target2','hl'));
+  document.querySelectorAll('.finger.on,.finger.on2').forEach(k => k.classList.remove('on','on2'));
+  $('kb').classList.remove('dim');
 }
-function genKeys(pool, focus, len = 48){
-  const weak = weakChars(pool);
-  const toks = []; let total = 0;
-  while (total < len){
-    const n = 2 + rnd(4); let w = '';
-    for (let i = 0; i < n; i++){
-      let c, r = Math.random();
-      do {
-        c = r < 0.55 ? pick(focus) : (r < 0.7 && weak.length ? pick(weak) : pick(pool));
-      } while (w.length >= 2 && w[w.length-1] === c && w[w.length-2] === c);
-      w += c;
-    }
-    toks.push({text:w}); total += n + 1;
+const markKey = (code, cls) => document.querySelectorAll(`.key[data-code="${code}"]`).forEach(e => e.classList.add(cls));
+const markFinger = (f, cls) => document.querySelectorAll(`.finger[data-f="${f}"]`).forEach(e => e.classList.add(cls));
+
+// ===== 画面サイズに合わせる (スクロールなし) =====
+function fitLayout(){
+  const topBottom = $('top').getBoundingClientRect().bottom;
+  const H = window.innerHeight - topBottom - 22;
+  const W = $('top').clientWidth;
+  const R = 600 / 245, HH_SIDE = 3.6, HH_STACK = 2.6;
+  // 手の図をキーボードの右に置く / 下に置く — 大きく表示できる方を選ぶ
+  const uSide = Math.min(W / (15 + HH_SIDE * R + 0.6), H / 5.15);
+  const uStack = Math.min(W / 15, H / (5.15 + HH_STACK + 0.1));
+  const side = uSide > uStack;
+  const u = Math.max(18, Math.min(side ? uSide : uStack, 58));
+  $('kbarea').classList.toggle('side', side);
+  const root = document.documentElement.style;
+  root.setProperty('--u', u + 'px');
+  root.setProperty('--hh', side ? HH_SIDE : HH_STACK);
+}
+function fitText(){
+  const box = $('textbox'), t = $('text');
+  let fs = t.classList.contains('intro') ? 17 : 30;
+  t.style.fontSize = fs + 'px';
+  while (t.scrollHeight > box.clientHeight && fs > 12){ fs -= 1; t.style.fontSize = fs + 'px'; }
+}
+
+// ===== 出題 =====
+function pickSentences(items, minLen, maxLen, lenOf){
+  const pool = items.slice().sort(() => Math.random() - 0.5);
+  if (pool.length > 1 && JSON.stringify(pool[0]) === lastPick) pool.push(pool.shift());
+  const out = []; let n = 0;
+  for (const s of pool){
+    const l = lenOf(s);
+    if (out.length && (n >= minLen || n + l > maxLen)) continue;
+    out.push(s); n += l + 1;
+    if (n >= minLen) break;
   }
-  return toks;
+  lastPick = JSON.stringify(out[0]);
+  return out;
+}
+function weakChars(){
+  return Object.keys(save.miss).filter(c => save.miss[c] >= 2)
+    .sort((a, b) => save.miss[b] / ((save.hits[b]||0) + save.miss[b]) - save.miss[a] / ((save.hits[a]||0) + save.miss[a]))
+    .slice(0, 8);
 }
 function makeTokens(lesson){
-  if (lesson.type === 'keys') return genKeys(lesson.pool, lesson.focus);
-  if (lesson.type === 'words'){
-    const t = []; let n = 0;
-    while (n < 55){ const w = pick(WORDS); t.push({text:w}); n += w.length + 1; }
-    return t;
-  }
-  if (lesson.type === 'romaji'){
-    const t = []; let n = 0;
-    while (n < 50){ const [k, r] = pick(ROMAJI); t.push({text:r, label:k}); n += r.length + 1; }
-    return t;
-  }
-  if (lesson.type === 'sentences'){
-    let s = pick(SENTENCES); let tries = 0;
-    while (s.length < 60 && tries++ < 10){ const n = pick(SENTENCES); if (!s.includes(n)) s += ' ' + n; }
-    return s.split(' ').map(w => ({text:w}));
+  const words = sentences => sentences.join(' ').split(' ').map((w, i, a) => ({text: w + (i < a.length - 1 ? ' ' : '')}));
+  if (lesson.type === 'en') return words(pickSentences(lesson.items, 36, 90, s => s.length));
+  if (lesson.type === 'ja'){
+    const ss = pickSentences(lesson.items, 30, 60, s => s.reduce((n, c) => n + c[1].length, 0));
+    return ss.flat().map(([label, text]) => ({label, text}));
   }
   if (lesson.type === 'weak'){
-    const w = weakChars();
-    if (w.length < 2) return genKeys('asdfghjkl;qwertyuiopzxcvbnm', 'asdfghjkl;qwertyuiopzxcvbnm');
-    return genKeys(w.join('') + 'asdfjkl', w.join(''));
+    const weak = weakChars();
+    const all = [...S_ALL, ...S_EN, ...S_NUM];
+    if (!weak.length) return words(pickSentences(all, 36, 90, s => s.length));
+    const score = s => [...s.toLowerCase()].filter(c => weak.includes(c)).length / s.length;
+    const top = all.slice().sort((a, b) => score(b) - score(a)).slice(0, 6);
+    return words(pickSentences(top, 36, 90, s => s.length));
   }
 }
 
-// ===== ラウンド =====
-function newRound(){
-  const lesson = LESSONS[lessonIdx];
-  const toks = makeTokens(lesson);
-  const box = $('text'); box.innerHTML = '';
+function renderTokens(toks){
+  const t = $('text'); t.className = 'text'; t.innerHTML = '';
   chars = []; target = '';
-  toks.forEach((t, i) => {
+  for (const tk of toks){
     const tok = document.createElement('span'); tok.className = 'tok';
-    if (t.label){ const k = document.createElement('span'); k.className = 'kana'; k.textContent = t.label; tok.appendChild(k); }
-    else if (lesson.type === 'romaji'){ tok.appendChild(Object.assign(document.createElement('span'), {className:'kana', textContent:' '})); }
+    if (tk.label){ const k = document.createElement('span'); k.className = 'kana'; k.textContent = tk.label; tok.appendChild(k); }
     const line = document.createElement('span');
-    const text = t.text + (i < toks.length - 1 ? ' ' : '');
-    for (const c of text){
+    for (const c of tk.text){
       const s = document.createElement('span'); s.className = 'ch' + (c === ' ' ? ' sp' : '');
       s.textContent = c === ' ' ? '␣' : c;
       line.appendChild(s); chars.push(s); target += c;
     }
-    tok.appendChild(line); box.appendChild(tok);
-  });
-  pos = 0; startTime = 0; correct = 0; misses = 0; roundMiss = {}; errAt = new Set(); missedCurrent = false;
+    tok.appendChild(line); t.appendChild(tok);
+  }
+  pos = 0; startTime = 0; correct = 0; misses = 0; roundMiss = {}; missedCurrent = false; typing = true;
   clearInterval(timer); timer = null;
-  setMsg(lesson.type === 'romaji' ? 'ひらがなを見てローマ字で打ちます(英数入力のまま)。「ー」は - キー。' :
-         'F と J の突起に人差し指をのせて、手元を見ずに打ちましょう。', true);
-  updateLive(); update();
+  $('live').classList.remove('hidden');
+  updateLive(); update(); fitText();
 }
 
+function newRound(){
+  clearInterval(introTimer); introTimer = null;
+  const lesson = LESSONS[lessonIdx];
+  if (lesson.type === 'intro'){ showIntro(); return; }
+  renderTokens(makeTokens(lesson));
+  setMsg(lesson.type === 'ja'
+    ? '上の日本語を見て、下のローマ字を打ちます(練習中は英数入力のまま)。「ー」は - キー、「。」は . キー。'
+    : 'ホームポジション(F と J の突起)から、手元を見ずに打ちましょう。', true);
+}
+
+// ===== 解説 =====
+function showIntro(){
+  clearInterval(introTimer); introTimer = null; clearMarks();
+  typing = false;
+  const p = INTRO[introPage];
+  const nav = `<span class="grow"></span>` +
+    (introPage > 0 ? `<button id="introBack">← 戻る</button>` : '') +
+    (p.practice ? '' : `<button class="primary" id="introNext">次へ → <span class="kbd" style="color:inherit">Enter</span></button>`);
+  $('guide').innerHTML = `<h2>${p.title}</h2><span class="plus">${introPage + 1} / ${INTRO.length}</span>${nav}`;
+  if ($('introBack')) $('introBack').onclick = e => { e.target.blur(); introPage--; showIntro(); };
+  if ($('introNext')) $('introNext').onclick = e => { e.target.blur(); introPage++; showIntro(); };
+  if (p.practice){
+    renderTokens(p.practice.split(' ').map((w, i, a) => ({text: w + (i < a.length - 1 ? ' ' : '')})));
+    setMsg('指をホームポジションに置いて、表示どおりに打ってみましょう。光った指で押します。', true);
+    return;
+  }
+  const t = $('text'); t.className = 'text intro'; t.innerHTML = p.html;
+  $('live').classList.add('hidden');
+  setMsg('', true);
+  if (p.hl){
+    const h = p.hl(); $('kb').classList.add('dim');
+    h.codes.forEach(c => markKey(c, 'hl')); h.fingers.forEach(f => markFinger(f, 'on'));
+  }
+  if (p.cycle){
+    const order = ['lp','lr','lm','li','th','ri','rm','rr','rp']; let i = 0;
+    const step = () => {
+      clearMarks(); $('kb').classList.add('dim');
+      const f = order[i++ % order.length];
+      document.querySelectorAll(`.key[data-f="${f}"]`).forEach(e => e.classList.add('hl'));
+      markFinger(f, 'on');
+      setMsg(`いま光っているのは <b>${FINGERS[f]}</b> の担当キー`, true);
+    };
+    step(); introTimer = setInterval(step, 1300);
+  }
+  fitText();
+}
+
+// ===== 入力ガイド =====
 function update(){
   chars.forEach((s, i) => s.classList.toggle('cur', i === pos));
-  document.querySelectorAll('.key.target,.key.target2').forEach(k => k.classList.remove('target','target2'));
-  document.querySelectorAll('.finger.on,.finger.on2').forEach(k => k.classList.remove('on','on2'));
-  const g = $('guide'); g.innerHTML = '';
+  clearMarks();
+  const g = $('guide');
+  const isIntro = LESSONS[lessonIdx].type === 'intro';
+  const keep = isIntro ? g.querySelector('button') : null;
+  g.innerHTML = '';
+  if (keep) g.appendChild(keep);
   if (pos >= target.length) return;
-  const hint = save.hint;
+  const hint = isIntro ? 'full' : save.hint;
   const show = hint === 'full' || hint === 'nolabel' || (hint === 'onmiss' && missedCurrent);
-  if (!show){ g.innerHTML = '<span class="plus">ヒント非表示中 — 指の位置を思い出して打ちましょう</span>'; return; }
+  if (!show){ g.insertAdjacentHTML('beforeend', '<span class="plus">ヒント非表示中 — 指の位置を思い出して打ちましょう</span>'); return; }
   const c = target[pos], info = charMap[c];
-  if (!info){ g.textContent = `「${c}」`; return; }
+  if (!info){ g.insertAdjacentHTML('beforeend', `「${esc(c)}」`); return; }
   const k = info.k;
-  document.querySelectorAll(`.key[data-code="${k.code}"]`).forEach(e => e.classList.add('target'));
-  markFinger(k.f, 'on');
+  markKey(k.code, 'target'); markFinger(k.f, 'on');
   const keyName = c === ' ' ? 'スペース' : (/[a-z]/i.test(c) ? c.toUpperCase() : c);
-  let html = `<span class="chip" data-f="${k.f}">${FINGERS[k.f]}</span> で <span class="keycap">${escapeHtml(keyName)}</span>`;
+  let html = `<span class="chip" data-f="${k.f}">${FINGERS[k.f]}</span> で <span class="keycap">${esc(keyName)}</span>`;
   if (info.shift){
     const left = k.f[0] === 'l';
     const sc = left ? 'ShiftRight' : 'ShiftLeft', sf = left ? 'rp' : 'lp';
-    document.querySelectorAll(`.key[data-code="${sc}"]`).forEach(e => e.classList.add('target2'));
-    markFinger(sf, 'on2');
+    markKey(sc, 'target2'); markFinger(sf, 'on2');
     html += ` <span class="plus">＋ <span class="chip" data-f="${sf}">${FINGERS[sf]}</span> で Shift を押しながら</span>`;
   }
-  g.innerHTML = html;
+  g.insertAdjacentHTML('beforeend', html);
 }
-function markFinger(f, cls){
-  document.querySelectorAll(`.finger[data-f="${f}"]`).forEach(e => e.classList.add(cls));
-}
-const escapeHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function setMsg(t, info){ const m = $('msg'); m.innerHTML = t; m.className = 'msg' + (info ? ' info' : ''); }
 function flashKey(code, ok){
   document.querySelectorAll(`.key[data-code="${code}"]`).forEach(e => {
@@ -465,33 +556,37 @@ function updateLive(){
 function onKey(e){
   if ($('modal').classList.contains('show')){ modalKey(e); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
-  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') { if (e.key.length === 1 || e.key === ' ') e.target.blur(); else return; }
+  const tag = e.target.tagName;
+  if (tag === 'SELECT' || tag === 'INPUT' || tag === 'BUTTON'){ if (e.key.length === 1 || e.key === 'Enter') e.target.blur(); else return; }
   if (e.key === 'Process' || e.isComposing || e.keyCode === 229){ $('ime').classList.add('show'); e.preventDefault(); return; }
+  $('ime').classList.remove('show');
+  if (!typing){ // 解説ページ
+    if (e.key === 'Enter' || e.key === 'ArrowRight'){ e.preventDefault(); if (introPage < INTRO.length - 1){ introPage++; showIntro(); } }
+    else if (e.key === 'ArrowLeft' && introPage > 0){ introPage--; showIntro(); }
+    return;
+  }
   if (e.key === 'Escape'){ newRound(); return; }
   if (e.key.length !== 1) return;
-  $('ime').classList.remove('show');
   e.preventDefault();
-  autoDetectFromCode(e.code);
+  if (!save.layout && layout !== 'jis' && (e.code === 'IntlYen' || e.code === 'IntlRo')) setLayout('jis', false);
   if (pos >= target.length) return;
   if (!startTime){ startTime = performance.now(); timer = setInterval(updateLive, 250); }
-  const exp = target[pos];
+  const exp = target[pos], lc = exp.toLowerCase();
   if (e.key === exp){
     flashKey(e.code, true);
-    correct++; save.hits[exp.toLowerCase()] = (save.hits[exp.toLowerCase()] || 0) + 1;
-    chars[pos].classList.remove('cur'); chars[pos].classList.add('done');
-    pos++; missedCurrent = false;
+    correct++; save.hits[lc] = (save.hits[lc] || 0) + 1;
+    chars[pos].classList.add('done'); pos++; missedCurrent = false;
     if (pos === target.length){ finish(); return; }
-    setMsg('', true);
+    if ($('msg').classList.contains('info') === false) setMsg('', true);
   } else {
     flashKey(e.code, false);
-    misses++; const lc = exp.toLowerCase();
-    save.miss[lc] = (save.miss[lc] || 0) + 1; roundMiss[lc] = (roundMiss[lc] || 0) + 1;
-    chars[pos].classList.add('err'); errAt.add(pos); missedCurrent = true;
-    const box = $('text'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    misses++; save.miss[lc] = (save.miss[lc] || 0) + 1; roundMiss[lc] = (roundMiss[lc] || 0) + 1;
+    chars[pos].classList.add('err'); missedCurrent = true;
+    const t = $('text'); t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake');
     const pk = keyByCode[e.code], info = charMap[exp];
     if (save.hint !== 'none' && pk && pk.f && info){
-      const same = pk.f === info.k.f;
-      setMsg(`✕ いま押したのは <b>${FINGERS[pk.f]}</b> のキー。` + (same ? '指は合っています、位置が違います。' : `正しくは <b>${FINGERS[info.k.f]}</b> です。`));
+      setMsg(`✕ いま押したのは <b>${FINGERS[pk.f]}</b> のキー。` +
+        (pk.f === info.k.f ? '指は合っています、位置が違います。' : `正しくは <b>${FINGERS[info.k.f]}</b> です。`));
     } else setMsg('✕ ミス');
     if (!save.strict){
       chars[pos].classList.add('done'); pos++; missedCurrent = false;
@@ -502,69 +597,76 @@ function onKey(e){
 }
 
 function finish(){
-  clearInterval(timer); timer = null; updateLive(); update(); persist();
+  clearInterval(timer); timer = null; typing = false; updateLive(); update(); persist();
   const ms = performance.now() - startTime;
   const speed = Math.round(correct / (ms / 60000));
   const acc = Math.round(correct / (correct + misses) * 100);
   $('resSpeed').textContent = speed; $('resAcc').textContent = acc; $('resTime').textContent = Math.round(ms / 1000);
-  const weak = Object.entries(roundMiss).sort((a,b) => b[1] - a[1]).slice(0, 3);
+  const weak = Object.entries(roundMiss).sort((a, b) => b[1] - a[1]).slice(0, 3);
   $('resWeak').innerHTML = weak.length
-    ? 'ミスが多かったキー: ' + weak.map(([c, n]) => { const i = charMap[c]; return `<b>${c === ' ' ? 'スペース' : escapeHtml(c.toUpperCase())}</b>(${i ? FINGERS[i.k.f] : ''}) ×${n}`; }).join('、 ')
+    ? 'ミスが多かったキー: ' + weak.map(([c, n]) => { const i = charMap[c]; return `<b>${c === ' ' ? 'スペース' : esc(c.toUpperCase())}</b>(${i ? FINGERS[i.k.f] : ''}) ×${n}`; }).join('、 ')
     : 'ノーミス! すばらしい。';
-  const id = LESSONS[lessonIdx].id;
-  let bestMsg = '';
-  if (acc >= 90 && speed > (save.best[id] || 0)){ save.best[id] = speed; bestMsg = '自己ベスト更新! '; persist(); renderLessons(); }
-  $('resBest').textContent = bestMsg + (save.best[id] ? `このレッスンの自己ベスト ${save.best[id]} 打/分(正確率90%以上のみ記録)` : '正確率90%以上で自己ベストに記録されます');
-  $('resTitle').textContent = acc >= 95 ? 'おつかれさま! 正確です' : acc >= 85 ? 'おつかれさま!' : 'ゆっくりで大丈夫。正確さ重視でいきましょう';
+  const lesson = LESSONS[lessonIdx];
+  if (lesson.type === 'intro'){
+    $('resTitle').textContent = 'ホームポジションはばっちり!';
+    $('resBest').textContent = '次は、ホーム段のキーだけで書ける文章を打ちます。';
+    $('againBtn').firstChild.textContent = 'もう一回 ';
+  } else {
+    let bestMsg = '';
+    if (acc >= 90 && speed > (save.best[lesson.id] || 0)){ save.best[lesson.id] = speed; bestMsg = '自己ベスト更新! '; persist(); renderLessonSel(); }
+    $('resBest').textContent = bestMsg + (save.best[lesson.id] ? `このレッスンの自己ベスト ${save.best[lesson.id]} 打/分(正確率90%以上のみ記録)` : '正確率90%以上で自己ベストに記録されます');
+    $('resTitle').textContent = acc >= 95 ? 'おつかれさま! 正確です' : acc >= 85 ? 'おつかれさま!' : 'ゆっくりで大丈夫。正確さ重視でいきましょう';
+    $('againBtn').firstChild.textContent = '次の文章 ';
+  }
   $('modal').classList.add('show'); modalOpenAt = performance.now();
 }
 function modalKey(e){
-  if (performance.now() - modalOpenAt < 500) { e.preventDefault(); return; }
-  if (e.key === ' '){ e.preventDefault(); closeModal(); newRound(); }
-  else if (e.key === 'Enter'){ e.preventDefault(); nextLesson(); }
-  else if (e.key === 'Escape'){ closeModal(); newRound(); }
+  e.preventDefault();
+  if (performance.now() - modalOpenAt < 500) return;
+  if (e.key === ' ' || e.key === 'Escape') again();
+  else if (e.key === 'Enter') nextLesson();
 }
 function closeModal(){ $('modal').classList.remove('show'); }
+function again(){ closeModal(); newRound(); }
 function nextLesson(){ closeModal(); selectLesson((lessonIdx + 1) % LESSONS.length); }
 
 // ===== レッスン・設定 =====
-function renderLessons(){
-  const nav = $('lessons'); nav.innerHTML = '';
-  LESSONS.forEach((l, i) => {
-    const b = document.createElement('button');
-    b.className = i === lessonIdx ? 'on' : '';
-    b.innerHTML = l.title + (save.best[l.id] ? `<span class="best">${save.best[l.id]}</span>` : '');
-    b.onclick = () => { b.blur(); selectLesson(i); };
-    nav.appendChild(b);
-  });
+function renderLessonSel(){
+  $('lessonSel').innerHTML = LESSONS.map((l, i) =>
+    `<option value="${i}"${i === lessonIdx ? ' selected' : ''}>${l.title}${save.best[l.id] ? ' (' + save.best[l.id] + ')' : ''}</option>`).join('');
 }
-function selectLesson(i){ lessonIdx = i; save.lesson = LESSONS[i].id; persist(); renderLessons(); newRound(); }
+function selectLesson(i){
+  lessonIdx = i; save.lesson = LESSONS[i].id; persist();
+  if (LESSONS[i].type === 'intro') introPage = 0;
+  renderLessonSel(); applyHint(); newRound();
+}
 function setLayout(l, chosen){
   layout = l; $('layoutSel').value = l;
   if (chosen){ save.layout = l; persist(); }
-  buildMaps(); renderKeyboard(); applyHint(); update();
-}
-function autoDetectFromCode(code){
-  if (!save.layout && layout !== 'jis' && (code === 'IntlYen' || code === 'IntlRo')) setLayout('jis', false);
+  buildMaps(); renderKeyboard();
+  applyHint();
+  if (typing) update(); else if (LESSONS[lessonIdx].type === 'intro') showIntro();
 }
 function applyHint(){
-  const h = save.hint;
+  const intro = LESSONS[lessonIdx].type === 'intro';
+  const h = intro ? 'full' : save.hint;
   $('kb').classList.toggle('nolabel', h !== 'full');
-  $('kb').parentElement.classList.toggle('hidden', h === 'none');
+  $('kbwrap').classList.toggle('hidden', h === 'none');
   $('hands').classList.toggle('hidden', h === 'none');
 }
 
+$('lessonSel').onchange = e => { selectLesson(+e.target.value); e.target.blur(); };
 $('layoutSel').onchange = e => { setLayout(e.target.value, true); e.target.blur(); };
 $('hintSel').value = save.hint;
-$('hintSel').onchange = e => { save.hint = e.target.value; persist(); applyHint(); update(); e.target.blur(); };
+$('hintSel').onchange = e => { save.hint = e.target.value; persist(); applyHint(); if (typing) update(); e.target.blur(); };
 $('strictChk').checked = save.strict;
 $('strictChk').onchange = e => { save.strict = e.target.checked; persist(); e.target.blur(); };
 $('restartBtn').onclick = e => { e.target.blur(); newRound(); };
-$('againBtn').onclick = () => { closeModal(); newRound(); };
+$('againBtn').onclick = again;
 $('nextBtn').onclick = nextLesson;
 document.addEventListener('keydown', onKey);
+window.addEventListener('resize', () => { fitLayout(); fitText(); });
 
-// Chrome/Edge ではキーボード配列を自動判定
 if (!save.layout && navigator.keyboard && navigator.keyboard.getLayoutMap){
   navigator.keyboard.getLayoutMap().then(m => {
     const v = m.get('Equal');
@@ -573,8 +675,8 @@ if (!save.layout && navigator.keyboard && navigator.keyboard.getLayoutMap){
   }).catch(() => {});
 }
 
-buildMaps(); renderKeyboard(); renderHands(); applyHint(); renderLessons(); newRound();
-setLayout(layout, false);
+buildMaps(); renderKeyboard(); renderHands(); renderLessonSel(); applyHint();
+fitLayout(); newRound(); fitLayout();
 </script>
 </body>
 </html>
