@@ -162,7 +162,6 @@ button:hover{border-color:var(--accent)}
           <option value="onmiss">ミスした時だけ</option>
           <option value="none">なし(本番)</option>
         </select></label>
-        <label><input type="checkbox" id="strictChk" checked> ミスしたら進まない</label>
         <label title="正確率95%以上・目標速度以上を3回ためると、自動で次のレベル(長い文・ヒント少なめ)に進みます"><input type="checkbox" id="autoChk" checked> 自動レベルアップ</label>
       </div>
     </header>
@@ -738,7 +737,7 @@ const INTRO = [
 
 // ===== 保存 (ブラウザ内のみ) =====
 const STORE_KEY = 'yubinavi-v3';
-let save = {layout:null, hint:'full', strict:true, lesson:'intro', miss:{}, hits:{}, best:{}, auto:true, level:0, lvPass:0};
+let save = {layout:null, hint:'full', lesson:'intro', miss:{}, hits:{}, best:{}, auto:true, level:0, lvPass:0};
 let hadSave = false;   // 前に練習した記録があるか (続きから始めるときの案内用)
 try { const s = localStorage.getItem(STORE_KEY); if (s){ Object.assign(save, JSON.parse(s)); hadSave = true; } } catch(e) {}
 function persist(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch(e) {} }
@@ -1209,10 +1208,6 @@ function onKey(e){
       setMsg(`✕ いま押したのは <b>${FINGERS[pk.f]}</b> のキー。` +
         (pk.f === info.k.f ? '指は合っています、位置が違います。' : `正しくは <b>${FINGERS[info.k.f]}</b> です。`));
     } else setMsg('✕ ミス');
-    if (!save.strict){   // ミスしても進む: その音は表示どおりに打ったことにする
-      buf = shownCand(U[ui]); finalizeUnit(); missedCurrent = false;
-      if (ui >= U.length){ drawText(); finish(); return; }
-    }
   }
   drawText(); updateLive(); update();
 }
@@ -1346,8 +1341,6 @@ $('hintSel').value = save.hint;
 $('hintSel').onchange = e => { save.hint = e.target.value; syncLevel(false); persist(); applyHint(); renderLevelTag(); if (typing) update(); e.target.blur(); };
 $('autoChk').checked = save.auto;
 $('autoChk').onchange = e => { save.auto = e.target.checked; syncLevel(true); persist(); applyHint(); renderLevelTag(); if (typing) update(); e.target.blur(); };
-$('strictChk').checked = save.strict;
-$('strictChk').onchange = e => { save.strict = e.target.checked; persist(); e.target.blur(); };
 $('restartBtn').onclick = e => { e.target.blur(); newRound(); };
 $('againBtn').onclick = again;
 $('nextBtn').onclick = nextLesson;
