@@ -681,13 +681,13 @@ const NUM = [
 ];
 const LESSONS = [
   {id:'intro', title:'0 ホームポジション解説', type:'intro'},
-  {id:'ja1',   title:'1 短い文(日本語)', type:'ja', items:JA_SHORT, min:28, max:60},
-  {id:'ja2',   title:'2 ふつうの文(日本語)', type:'ja', items:JA_MID, min:40, max:75},
-  {id:'ja3',   title:'3 長めの文(日本語・読点)', type:'ja', items:JA_LONG, min:40, max:80},
+  {id:'ja1',   title:'1 短い文(日本語)', type:'ja', items:JA_SHORT},
+  {id:'ja2',   title:'2 ふつうの文(日本語)', type:'ja', items:JA_MID},
+  {id:'ja3',   title:'3 長めの文(日本語・読点)', type:'ja', items:JA_LONG},
   {id:'en',    title:'4 英語の文', type:'en', items:EN},
   {id:'num',   title:'5 数字・記号入りの文', type:'en', items:NUM},
-  {id:'kotowaza', title:'6 ことわざ', type:'ja', items:JA_PROVERB, min:36, max:70},
-  {id:'mix',   title:'7 ミックス(日本語・長文)', type:'ja', items:JA_ALL, min:45, max:80},
+  {id:'kotowaza', title:'6 ことわざ', type:'ja', items:JA_PROVERB},
+  {id:'mix',   title:'7 ミックス(日本語・長文)', type:'ja', items:JA_ALL},
   {id:'weak',  title:'★ 苦手キーが多い文', type:'weak'}
 ];
 
@@ -971,39 +971,26 @@ function fitText(){
 /// ===== 出題 =====
 // 最近出た文字の回数 (古いほど軽く)。少ししか出ていない文字を含む文を優先して、いろんなキーが出るようにする
 let seenKeys = {};
-function pickSentences(items, minLen, maxLen, lenOf, keysOf){
+function pickSentences(items, keysOf){
+  // 1回に出すのは1文だけ (別々の文をつなぐと意味がつながらないため)
   // 最近出た文は後回しにして、なるべく同じ文が続かないようにする
   const shuffled = items.slice().sort(() => Math.random() - 0.5);
   const fresh = shuffled.filter(s => !recent.includes(JSON.stringify(s)));
   const pool = [...fresh, ...shuffled.filter(s => recent.includes(JSON.stringify(s)))];
-  const seen = Object.assign({}, seenKeys);
-  // まだあまり出ていない文字を多く含むほど高い点
-  const gain = s => { const k = keysOf(s); let g = 0; for (const c of new Set(k)) g += 1 / (1 + (seen[c] || 0)); return g / Math.sqrt(k.length); };
-  const out = []; let n = 0;
-  for (;;){
-    // ランダムに並べた候補(新しい文が先)から、長さが入るものを12個見て、いちばん点が高い文を選ぶ
-    const cands = [];
-    for (const s of pool){
-      if (out.includes(s) || (out.length && n + lenOf(s) > maxLen)) continue;
-      cands.push(s); if (cands.length >= 12) break;
-    }
-    if (!cands.length) break;
-    let best = cands[0];
-    if (keysOf){ let bv = -1; for (const s of cands){ const g = gain(s); if (g > bv){ bv = g; best = s; } } }
-    out.push(best); n += lenOf(best) + 1;
-    if (keysOf) for (const c of keysOf(best)) seen[c] = (seen[c] || 0) + 1;
-    if (n >= minLen) break;
-  }
+  // ランダムに並べた候補(新しい文が先)を12個見て、まだあまり出ていない文字を多く含む文を選ぶ
+  const cands = pool.slice(0, 12);
+  const gain = s => { const k = keysOf(s); let g = 0; for (const c of new Set(k)) g += 1 / (1 + (seenKeys[c] || 0)); return g / Math.sqrt(k.length); };
+  let best = cands[0];
+  if (keysOf){ let bv = -1; for (const s of cands){ const g = gain(s); if (g > bv){ bv = g; best = s; } } }
   if (keysOf){
-    for (const c in seenKeys) seenKeys[c] *= 0.6;
-    for (const s of out) for (const c of keysOf(s)) seenKeys[c] = (seenKeys[c] || 0) + 1;
+    for (const c in seenKeys) seenKeys[c] *= 0.8;
+    for (const c of keysOf(best)) seenKeys[c] = (seenKeys[c] || 0) + 1;
   }
-  for (const s of out) recent.push(JSON.stringify(s));
+  recent.push(JSON.stringify(best));
   recent = recent.slice(-Math.min(60, Math.floor(items.length * 0.7)));
-  return out;
+  return [best];
 }
 const jaRomaji = s => s.map(c => kanaUnits(c[1]).map(u => u.cands[0]).join('')).join('');
-const jaLen = s => jaRomaji(s).length;
 const enKeys = s => s.toLowerCase().replace(/ /g, '');
 function enTokens(sentences){
   return sentences.join(' ').split(' ').map((w, i, a) => ({units: textUnits(w + (i < a.length - 1 ? ' ' : ''))}));
@@ -1015,14 +1002,14 @@ function weakChars(){
     .slice(0, 8);
 }
 function makeTokens(lesson){
-  if (lesson.type === 'en') return enTokens(pickSentences(lesson.items, 36, 90, s => s.length, enKeys));
-  if (lesson.type === 'ja') return jaTokens(pickSentences(lesson.items, lesson.min, lesson.max, jaLen, jaRomaji));
+  if (lesson.type === 'en') return enTokens(pickSentences(lesson.items, enKeys));
+  if (lesson.type === 'ja') return jaTokens(pickSentences(lesson.items, jaRomaji));
   if (lesson.type === 'weak'){
     const weak = weakChars();
     const all = JA_ALL;
     const score = s => { const t = jaRomaji(s); return [...t].filter(c => weak.includes(c)).length / t.length; };
     const top = weak.length ? all.slice().sort((a, b) => score(b) - score(a)).slice(0, 8) : JA_MID;
-    return jaTokens(pickSentences(top, 40, 75, jaLen));
+    return jaTokens(pickSentences(top));
   }
 }
 
